@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">RSSFeeder</string>
+    <string name="article_detail">Article detail</string>
+    <string name="share">Share</string>
+    <string name="share_message_format">Show this article: \'%1$s\' at website %2$s</string>
+    <string name="share_article">Share this article</string>
+</resources>
