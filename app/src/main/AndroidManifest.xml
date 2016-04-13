@@ -1,24 +1,45 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="cz.cvut.panskpe1.rssfeeder">
 
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
+        android:theme="@style/Theme.RSSFeeder">
 
-        <activity android:name="cz.cvut.panskpe1.rssfeeder.MainActivity"
+        <activity
+            android:name=".activity.main.MainActivity"
             android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name="cz.cvut.panskpe1.rssfeeder.ArticleDetailActivity"
+        <activity
+            android:name=".activity.article.ArticleDetailActivity"
             android:label="@string/article_detail">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.cvut.panskpe1.rssfeeder.activity.main.MainActivity" />
         </activity>
 
+        <activity
+            android:name=".activity.feed.FeedActivity"
+            android:label="@string/feeds_list">
+
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="cz.cvut.panskpe1.rssfeeder.activity.main.MainActivity" />
+        </activity>
+
+        <provider
+            android:name="cz.cvut.panskpe1.rssfeeder.data.RssFeederContentProvider"
+            android:authorities="cz.cvut.panskpe1.rssfeeder"
+            android:exported="false" />
     </application>
 
 </manifest>

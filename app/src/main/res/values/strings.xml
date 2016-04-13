@@ -4,4 +4,34 @@
     <string name="share">Share</string>
     <string name="share_message_format">Show this article: \'%1$s\' at website %2$s</string>
     <string name="share_article">Share this article</string>
+    <string name="menu_about">About</string>
+    <string name="sample_title">Sample title</string>
+    <string name="sample_summary">Sample summary</string>
+    <string name="sample_date_author">Sample date author</string>
+    <string name="entry_date_author">now</string>
+    <string name="menu_share_article">Share</string>
+    <string name="share_subject">Article to read: %s</string>
+    <string name="share_text">I found an awesome article to read, check it here: %s</string>
+    <string name="share_chooser">Choose app to share</string>
+    <string name="entry_not_found">Article not found</string>
+    <string name="entry_not_found_desc">The Article was not found. Please return back and select</string>
+    <string name="main_item_menu_feeds">Manage feeds</string>
+    <string name="add_feed">Add feed</string>
+    <string name="update_item">update_item</string>
+    <string name="feeds_list">feeds_list</string>
+    <string name="add_new_feed">Add new feed</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+    <string name="delete_feed_mess">Do you want to delete this feed?</string>
+    <string name="Delete">Delete</string>
+    <string name="Cancel">Cancel</string>
+    <string name="invalid">Invalid</string>
+    <string name="valid">Valid</string>
+    <string name="unknown_title">Unknown title</string>
+    <string name="unknown_author">Unknown author</string>
+    <string name="delete_feed_title">Delete feed</string>
+    <string name="type_feed_url">Type feed url</string>
+    <string name="feed_added_mess">Feed added</string>
+    <string name="feed_deleted_mess">Feed deleted</string>
+
 </resources>
