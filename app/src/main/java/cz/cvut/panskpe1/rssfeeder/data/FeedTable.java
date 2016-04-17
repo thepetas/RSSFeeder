@@ -18,8 +18,8 @@ public class FeedTable {
 //            + TITLE + " text not null, "
             + TITLE + " text null, "
             + SUBTITLE + " text null, "
-            + LINK + " text not null, "
-            + UPDATED + " integer null, "
+            + LINK + " text not null unique, "
+            + UPDATED + " text null, "
             + AUTHOR + " text null, "
             + AUTHOR_EMAIL + " text null "
             + ");";

@@ -19,10 +19,11 @@
         android:text="@string/sample_title"
         android:textAppearance="@android:style/TextAppearance.Holo.Medium"
         android:textStyle="bold" />
+
     <TextView
         android:id="@+id/item_feed_link"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="?android:textColorSecondary"
-        android:text="@string/sample_summary"/>
+        android:text="@string/sample_summary"
+        android:textColor="?android:textColorSecondary" />
 </LinearLayout>

@@ -28,7 +28,6 @@ public class FeedsListFragment extends Fragment implements LoaderManager.LoaderC
     private ListView mListView;
     private FeedCursorAdapter mAdapter;
 
-    @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.list_fragment, container, false);
@@ -67,7 +66,8 @@ public class FeedsListFragment extends Fragment implements LoaderManager.LoaderC
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         switch (loader.getId()) {
             case FEED_LOADER:
-                mAdapter.swapCursor(data);
+                mAdapter.changeCursor(data);
+//                mAdapter.swapCursor(data);
                 break;
             default:
                 break;
@@ -78,7 +78,8 @@ public class FeedsListFragment extends Fragment implements LoaderManager.LoaderC
     public void onLoaderReset(Loader<Cursor> loader) {
         switch (loader.getId()) {
             case FEED_LOADER:
-                mAdapter.swapCursor(null);
+                mAdapter.changeCursor(null);
+//                mAdapter.swapCursor(null);
                 break;
 
             default:

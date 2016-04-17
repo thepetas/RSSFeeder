@@ -26,7 +26,6 @@ import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.TITLE;
 public class FeedCursorAdapter extends CursorAdapter {
 
 
-    private static final int TAG_FEED_ID = 1;
     private LayoutInflater mInflater;
     private Context mContext;
     private static final String TAG = "FEED_CURSOR_ADAPTER";
@@ -83,7 +82,6 @@ public class FeedCursorAdapter extends CursorAdapter {
                         });
                 AlertDialog alert = builder.create();
                 alert.show();
-                // TODO vyresit otaceni delete dialogu
             }
         });
     }

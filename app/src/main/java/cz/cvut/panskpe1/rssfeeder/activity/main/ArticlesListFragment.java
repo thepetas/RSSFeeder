@@ -17,6 +17,7 @@ import cz.cvut.panskpe1.rssfeeder.data.RssFeederContentProvider;
 
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.AUTHOR;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.CONTENT;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.FEED_ID;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.ID;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.LINK;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.SUMMARY;
@@ -57,7 +58,7 @@ public class ArticlesListFragment extends Fragment implements LoaderManager.Load
         switch (id) {
             case ARTICLE_LOADER:
                 return new CursorLoader(getActivity(), RssFeederContentProvider.CONTENT_URI_ARTICLE,
-                        new String[]{ID, TITLE, SUMMARY}, null, null, null);
+                        new String[]{ID, TITLE, SUMMARY, FEED_ID}, null, null, null);
             default:
                 break;
         }
@@ -69,7 +70,8 @@ public class ArticlesListFragment extends Fragment implements LoaderManager.Load
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         switch (loader.getId()) {
             case ARTICLE_LOADER:
-                mAdapter.swapCursor(data);
+                mAdapter.changeCursor(data);
+//                mAdapter.swapCursor(data);
                 break;
             default:
                 break;
@@ -81,21 +83,11 @@ public class ArticlesListFragment extends Fragment implements LoaderManager.Load
     public void onLoaderReset(Loader<Cursor> loader) {
         switch (loader.getId()) {
             case ARTICLE_LOADER:
-                mAdapter.swapCursor(null);
+                mAdapter.changeCursor(null);
+//                mAdapter.swapCursor(null);
                 break;
-
             default:
                 break;
         }
-    }
-
-    private void fillDatabase() {
-        ContentValues cv = new ContentValues();
-        cv.put(TITLE, "fdafadfffffffffffffdafr");
-        cv.put(SUMMARY, "dfadfadfafaf");
-        cv.put(CONTENT, "fdafadfadfaf");
-        cv.put(LINK, "http://servis.idnes.cz/rss.aspx?c=prahah");
-        cv.put(AUTHOR, "AUTOR");
-        getActivity().getContentResolver().insert(RssFeederContentProvider.CONTENT_URI_ARTICLE, cv);
     }
 }

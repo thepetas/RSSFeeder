@@ -4,40 +4,48 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/margin_vertical"
         android:paddingLeft="@dimen/margin_horizontal"
         android:paddingRight="@dimen/margin_horizontal"
-        android:paddingTop="@dimen/margin_vertical"
-        android:paddingBottom="@dimen/margin_vertical">
+        android:paddingTop="@dimen/margin_vertical">
 
         <TextView
             android:id="@+id/article_detail_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="24sp"
             android:fontFamily="sans-serif-condensed"
-            android:textStyle="bold"
-            android:text="@string/sample_title"/>
+            android:text="@string/sample_title"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/article_detail_date_author"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/margin_vertical"
-            android:textAppearance="@android:style/TextAppearance.Holo.Small"
+            android:text="@string/sample_date_author"
             android:textAllCaps="true"
-            android:text="@string/sample_date_author"/>
+            android:textAppearance="@android:style/TextAppearance.Holo.Small" />
+
+        <TextView
+            android:id="@+id/article_link"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/margin_vertical"
+            android:text="@string/view_full_article"
+            android:textAppearance="@android:style/TextAppearance.Holo.Small" />
 
         <TextView
             android:id="@+id/article_detail_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textAppearance="@android:style/TextAppearance.Holo.Medium"
-            android:textColor="?android:textColorSecondary"
-            android:lineSpacingMultiplier="1.2"
             android:fontFamily="sans-serif-light"
-            android:text="@string/sample_summary"/>
+            android:lineSpacingMultiplier="1.2"
+            android:text="@string/sample_summary"
+            android:textAppearance="@android:style/TextAppearance.Holo.Medium"
+            android:textColor="?android:textColorSecondary" />
     </LinearLayout>
 </ScrollView>

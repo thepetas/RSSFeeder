@@ -6,6 +6,7 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
@@ -83,18 +84,18 @@ public class RssFeederContentProvider extends ContentProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(Uri uri, ContentValues values) throws SQLiteConstraintException {
         int uriType = sURIMatcher.match(uri);
         SQLiteDatabase sqlDB = mRssFeederDatabaseHelper.getWritableDatabase();
         String path;
         long id = 0;
         switch (uriType) {
             case ARTICLE_LIST:
-                id = sqlDB.insert(ArticleTable.TABLE_ARTICLE, null, values);
+                id = sqlDB.insertOrThrow(ArticleTable.TABLE_ARTICLE, null, values);
                 path = BASE_PATH_ARTICLE;
                 break;
             case FEED_LIST:
-                id = sqlDB.insert(FeedTable.TABLE_FEED, null, values);
+                id = sqlDB.insertOrThrow(FeedTable.TABLE_FEED, null, values);
                 path = BASE_PATH_FEED;
                 break;
             default:
@@ -134,7 +135,31 @@ public class RssFeederContentProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        int uriType = sURIMatcher.match(uri);
+        SQLiteDatabase sqlDB = mRssFeederDatabaseHelper.getWritableDatabase();
+        int rowsUpdated = 0;
+        String id;
+        switch (uriType) {
+            case ARTICLE_LIST:
+                rowsUpdated = sqlDB.update(ArticleTable.TABLE_ARTICLE, values, selection, selectionArgs);
+                break;
+            case ARTICLE_ID:
+                id = uri.getLastPathSegment();
+                rowsUpdated = sqlDB.update(ArticleTable.TABLE_ARTICLE, values, selection, selectionArgs);
+                break;
+            case FEED_LIST:
+                rowsUpdated = sqlDB.update(FeedTable.TABLE_FEED, values, selection, selectionArgs);
+                break;
+            case FEED_ID:
+                id = uri.getLastPathSegment();
+                rowsUpdated = sqlDB.update(FeedTable.TABLE_FEED, values, selection, selectionArgs);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown URI: " + uri);
+        }
+        getContext().getContentResolver().notifyChange(uri, null);
+        return rowsUpdated;
+
     }
 
 }

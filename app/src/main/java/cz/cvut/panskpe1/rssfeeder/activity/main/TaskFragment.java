@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
-import android.util.Log;
+
+import cz.cvut.panskpe1.rssfeeder.data.UpdateManager;
 
 /**
  * Created by petr on 4/13/16.
@@ -14,13 +14,18 @@ public class TaskFragment extends Fragment {
 
     private TaskCallbacks mCallbacks;
     private UpdateAsyncTask mTask;
+    private boolean isRunning = false;
+
+    public boolean isRunning() {
+        return isRunning;
+    }
 
     public interface TaskCallbacks {
         void onPreExecute();
 
-        void onPostExecute();
+        void onPostExecute(int cnt);
 
-        void updateProgress(int progress);
+        void updateProgress();
     }
 
     @Override
@@ -46,37 +51,41 @@ public class TaskFragment extends Fragment {
         mCallbacks = null;
     }
 
-    private class UpdateAsyncTask extends AsyncTask<Void, Integer, Void> {
+    public class UpdateAsyncTask extends AsyncTask<Void, Void, Integer> {
 
 
         @Override
         protected void onPreExecute() {
             if (mCallbacks != null) {
                 mCallbacks.onPreExecute();
+                isRunning = true;
             }
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            for (int i = 0; !isCancelled() && i < 100; i++) {
-                SystemClock.sleep(50);
-//                publishProgress(i);
+        protected Integer doInBackground(Void... params) {
+//            SystemClock.sleep(10000);
+            try {
+                return UpdateManager.updateArticles(getActivity());
+            } catch (Exception e) {
+                return -1;
             }
-            return null;
         }
 
         @Override
-        protected void onProgressUpdate(Integer... values) {
-            mCallbacks.updateProgress(values[0]);
+        protected void onProgressUpdate(Void... values) {
+            mCallbacks.updateProgress();
             super.onProgressUpdate(values);
         }
 
 
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(Integer values) {
             if (mCallbacks != null) {
-                mCallbacks.onPostExecute();
+                mCallbacks.onPostExecute(values);
+                isRunning = false;
             }
         }
+
     }
 }

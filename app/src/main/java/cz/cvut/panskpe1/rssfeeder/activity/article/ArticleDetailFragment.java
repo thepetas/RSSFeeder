@@ -2,11 +2,14 @@ package cz.cvut.panskpe1.rssfeeder.activity.article;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Html;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
-import android.util.Log;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,9 +19,18 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import cz.cvut.panskpe1.rssfeeder.R;
+import cz.cvut.panskpe1.rssfeeder.data.RssFeederContentProvider;
+import cz.cvut.panskpe1.rssfeeder.model.DateHelper;
 import cz.cvut.panskpe1.rssfeeder.model.Feed;
 import cz.cvut.panskpe1.rssfeeder.model.FeedEntry;
-import cz.cvut.panskpe1.rssfeeder.model.MockData;
+
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.AUTHOR;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.CONTENT;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.ID;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.LINK;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.SUMMARY;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.TITLE;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.UPDATED;
 
 /**
  * Created by petr on 3/20/16.
@@ -34,6 +46,7 @@ public class ArticleDetailFragment extends Fragment {
     private TextView mTitle;
     private TextView mDate;
     private TextView mText;
+    private TextView mLink;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,18 +68,29 @@ public class ArticleDetailFragment extends Fragment {
         mTitle = (TextView) view.findViewById(R.id.article_detail_title);
         mDate = (TextView) view.findViewById(R.id.article_detail_date_author);
         mText = (TextView) view.findViewById(R.id.article_detail_text);
+        mLink = (TextView) view.findViewById(R.id.article_link);
 
         initArticleEntry();
-
         if (mFeedEntry != null) {
             mTitle.setText(Html.fromHtml(mFeedEntry.getTitle()));
             String author = mFeedEntry.getAuthor();
             if (TextUtils.isEmpty(author)) {
                 author = mFeedEntry.getFeed().getAuthor();
+                // TODO vyresit authora null
             }
+
             CharSequence relativeDate = DateUtils.getRelativeTimeSpanString(mFeedEntry.getUpdated());
-            mDate.setText(getString(R.string.entry_date_author, relativeDate, author));
-            mText.setText(Html.fromHtml(mFeedEntry.getContent()));
+
+            mDate.setText(getString(R.string.time_by_author, relativeDate.toString(), author));
+            String link = "<a href='" + mFeedEntry.getLink() + "'>" + getResources().getString(R.string.view_full_article)
+                    + "</a>";
+            Spanned textContent = Html.fromHtml(mFeedEntry.getContent());
+            mText.setMovementMethod(LinkMovementMethod.getInstance());
+            mText.setText(textContent);
+            Spanned textLink = Html.fromHtml(link);
+            mLink.setMovementMethod(LinkMovementMethod.getInstance());
+            mLink.setText(textLink);
+
         } else {
             mTitle.setText(R.string.entry_not_found);
             mDate.setVisibility(View.INVISIBLE);
@@ -76,18 +100,36 @@ public class ArticleDetailFragment extends Fragment {
     }
 
     private void initArticleEntry() {
-        Feed feed = MockData.getFeed(getArguments().getString(ARG_FEED_ID));
-        Log.i("FRAGMENT", getArguments().getString(ARG_FEED_ID));
-        mFeedEntry = null;
-        if (feed != null) {
-            String entryId = getArguments().getString(ARG_ENTRY_ID);
-            for (FeedEntry entry : feed.getEntries()) {
-                if (entry.getId().equals(entryId)) {
-                    mFeedEntry = entry;
-                    break;
-                }
-            }
+        int feedId = getArguments().getInt(ARG_FEED_ID);
+        int id = getArguments().getInt(ARG_ENTRY_ID);
+        Feed feed = null;
+        Cursor cFeed = getActivity().getContentResolver().query(
+                Uri.withAppendedPath(RssFeederContentProvider.CONTENT_URI_FEED, String.valueOf(feedId)),
+                null, null, null, null);
+        if (cFeed.moveToNext()) {
+            feed = new Feed(String.valueOf(id), cFeed.getString(cFeed.getColumnIndex(LINK)), cFeed.getString(cFeed.getColumnIndex(TITLE)));
+            feed.setAuthor(cFeed.getString(cFeed.getColumnIndex(AUTHOR)));
         }
+        cFeed.close();
+
+        if (feed != null) {
+            Cursor cArticle = getActivity().getContentResolver().query(
+                    Uri.withAppendedPath(RssFeederContentProvider.CONTENT_URI_ARTICLE, String.valueOf(id)),
+                    null, null, null, null);
+
+            if (cArticle.moveToNext()) {
+                mFeedEntry = new FeedEntry(feed,
+                        cArticle.getString(cArticle.getColumnIndex(TITLE)),
+                        cArticle.getString(cArticle.getColumnIndex(ID)),
+                        cArticle.getString(cArticle.getColumnIndex(LINK)));
+                mFeedEntry.setSummary(cArticle.getString(cArticle.getColumnIndex(SUMMARY)));
+                mFeedEntry.setContent(cArticle.getString(cArticle.getColumnIndex(CONTENT)));
+                mFeedEntry.setUpdated(DateHelper.getTimeInMiliSeconds(cArticle.getString(cArticle.getColumnIndex(UPDATED))));
+                mFeedEntry.setAuthor(cArticle.getString(cArticle.getColumnIndex(AUTHOR)));
+            }
+            cArticle.close();
+        }
+
     }
 
     @Override

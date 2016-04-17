@@ -3,7 +3,7 @@
     android:layout_height="match_parent">
 
     <fragment
-        android:id="@+id/fragment_feedlist"
+        android:id="@+id/fragment_articleslist"
         android:name="cz.cvut.panskpe1.rssfeeder.activity.main.ArticlesListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

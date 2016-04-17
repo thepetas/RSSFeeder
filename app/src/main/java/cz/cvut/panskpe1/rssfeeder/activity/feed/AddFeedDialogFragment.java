@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -61,9 +62,14 @@ public class AddFeedDialogFragment extends DialogFragment {
             builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    mListener.addFeed(mText.getText().toString());
-                    Toast toast = Toast.makeText(getActivity(), R.string.feed_added_mess, Toast.LENGTH_LONG);
-                    toast.show();
+                    try {
+                        mListener.addFeed(mText.getText().toString());
+                        Toast toast = Toast.makeText(getActivity(), R.string.feed_added_mess, Toast.LENGTH_LONG);
+                        toast.show();
+                    } catch (SQLiteConstraintException ex) {
+                        Toast toast = Toast.makeText(getActivity(), R.string.feed_exists, Toast.LENGTH_LONG);
+                        toast.show();
+                    }
                 }
             });
 

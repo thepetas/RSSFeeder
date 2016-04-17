@@ -15,7 +15,6 @@ public class Feed {
     private String mSubtitle;
     private long mUpdated;
     private String mAuthor;
-    private String mAuthorEmail;
 
     private List<FeedEntry> mEntries;
 
@@ -72,14 +71,6 @@ public class Feed {
 
     public void setAuthor(String mAuthor) {
         this.mAuthor = mAuthor;
-    }
-
-    public String getAuthorEmail() {
-        return mAuthorEmail;
-    }
-
-    public void setAuthorEmail(String mAuthorEmail) {
-        this.mAuthorEmail = mAuthorEmail;
     }
 
     public List<FeedEntry> getEntries() {

@@ -33,5 +33,10 @@
     <string name="type_feed_url">Type feed url</string>
     <string name="feed_added_mess">Feed added</string>
     <string name="feed_deleted_mess">Feed deleted</string>
+    <string name="feed_exists">Failed. Feed already exists.</string>
+    <string name="update_failed">Update failed</string>
+    <string name="time_by_author">%1$s by %2$s</string>
+    <string name="view_full_article">VIEW FULL ARTICLE</string>
+    <string name="articles_updated">#%s updated.</string>
 
 </resources>

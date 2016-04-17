@@ -3,16 +3,17 @@ package cz.cvut.panskpe1.rssfeeder.activity.feed;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ContentValues;
-import android.os.Build;
+import android.database.sqlite.SQLiteConstraintException;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import cz.cvut.panskpe1.rssfeeder.R;
 import cz.cvut.panskpe1.rssfeeder.data.RssFeederContentProvider;
 
-import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.*;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.AUTHOR;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.LINK;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.TITLE;
 
 /**
  * Created by petr on 3/19/16.
@@ -52,7 +53,7 @@ public class FeedActivity extends Activity implements AddFeedDialogFragment.AddF
     }
 
     @Override
-    public void addFeed(String url) {
+    public void addFeed(String url) throws SQLiteConstraintException {
         ContentValues cv = new ContentValues();
         cv.put(LINK, url);
         cv.put(TITLE, getResources().getString(R.string.unknown_title));

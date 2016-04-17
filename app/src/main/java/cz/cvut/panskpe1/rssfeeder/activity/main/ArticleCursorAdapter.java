@@ -1,17 +1,21 @@
 package cz.cvut.panskpe1.rssfeeder.activity.main;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CursorAdapter;
 import android.widget.TextView;
 
-import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.*;
-
 import cz.cvut.panskpe1.rssfeeder.R;
+import cz.cvut.panskpe1.rssfeeder.activity.article.ArticleDetailActivity;
+
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.FEED_ID;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.ID;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.SUMMARY;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.TITLE;
 
 /**
  * Created by petr on 4/13/16.
@@ -47,10 +51,25 @@ public class ArticleCursorAdapter extends CursorAdapter {
     }
 
     @Override
-    public void bindView(View view, Context context, Cursor cursor) {
+    public void bindView(final View view, Context context, final Cursor cursor) {
         ViewHolder holder = (ViewHolder) view.getTag();
         holder.title.setText(cursor.getString(cursor.getColumnIndex(TITLE)));
-        holder.summary.setText(cursor.getString(cursor.getColumnIndex(SUMMARY)));
+        String sum = cursor.getString(cursor.getColumnIndex(SUMMARY));
+        sum = sum.substring(0, 100).trim();
+        holder.summary.setText(sum);
+
+        final int id = cursor.getInt(cursor.getColumnIndex(ID));
+        final int feedId = cursor.getInt(cursor.getColumnIndex(FEED_ID));
+
+        view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, ArticleDetailActivity.class);
+                intent.putExtra(ArticleDetailActivity.ENTRY_ID, id);
+                intent.putExtra(ArticleDetailActivity.FEED_ID, feedId);
+                mContext.startActivity(intent);
+            }
+        });
     }
 
 }
