@@ -14,6 +14,7 @@ public class TaskFragment extends Fragment {
 
     private TaskCallbacks mCallbacks;
     private UpdateAsyncTask mTask;
+    private UpdateManager mManager;
     private boolean isRunning = false;
 
     public boolean isRunning() {
@@ -23,7 +24,7 @@ public class TaskFragment extends Fragment {
     public interface TaskCallbacks {
         void onPreExecute();
 
-        void onPostExecute(int cnt);
+        void onPostExecute(boolean cnt);
 
         void updateProgress();
     }
@@ -38,6 +39,7 @@ public class TaskFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        mManager = new UpdateManager(getActivity().getContentResolver(), getResources());
     }
 
     public void executeTask() {
@@ -51,7 +53,7 @@ public class TaskFragment extends Fragment {
         mCallbacks = null;
     }
 
-    public class UpdateAsyncTask extends AsyncTask<Void, Void, Integer> {
+    public class UpdateAsyncTask extends AsyncTask<Void, Void, Boolean> {
 
 
         @Override
@@ -63,13 +65,8 @@ public class TaskFragment extends Fragment {
         }
 
         @Override
-        protected Integer doInBackground(Void... params) {
-//            SystemClock.sleep(10000);
-            try {
-                return UpdateManager.updateArticles(getActivity());
-            } catch (Exception e) {
-                return -1;
-            }
+        protected Boolean doInBackground(Void... params) {
+                return mManager.updateAll();
         }
 
         @Override
@@ -80,7 +77,7 @@ public class TaskFragment extends Fragment {
 
 
         @Override
-        protected void onPostExecute(Integer values) {
+        protected void onPostExecute(Boolean values) {
             if (mCallbacks != null) {
                 mCallbacks.onPostExecute(values);
                 isRunning = false;

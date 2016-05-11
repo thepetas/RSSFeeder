@@ -37,7 +37,7 @@
         </activity>
 
         <provider
-            android:name="cz.cvut.panskpe1.rssfeeder.data.RssFeederContentProvider"
+            android:name=".data.ContentProvider"
             android:authorities="cz.cvut.panskpe1.rssfeeder"
             android:exported="false" />
     </application>

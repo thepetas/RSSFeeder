@@ -83,12 +83,12 @@ public class MainActivity extends Activity implements TaskFragment.TaskCallbacks
     }
 
     @Override
-    public void onPostExecute(int number) {
-        if (number < 0) {
+    public void onPostExecute(boolean number) {
+        if (!number) {
             Toast toast = Toast.makeText(this, R.string.update_failed, Toast.LENGTH_LONG);
             toast.show();
         } else {
-            Toast toast = Toast.makeText(this, getString(R.string.articles_updated, number), Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(this, R.string.successfully_updated, Toast.LENGTH_LONG);
             toast.show();
 
         }

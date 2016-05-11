@@ -19,7 +19,7 @@ public class ArticleTable {
             + SUMMARY + " text null, "
             + CONTENT + " text not null, "
             + LINK + " text not null unique, "
-            + UPDATED + " text not null, "
+            + UPDATED + " integer not null, "
             + AUTHOR + " text null, "
             + FEED_ID + " integer"
 //            + "FOREIGN KEY ( " + FEED_ID + " ) REFERENCES " + FeedTable.TABLE_FEED + "( " + FEED_ID + ") "

@@ -2,7 +2,6 @@ package cz.cvut.panskpe1.rssfeeder.data;
 
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.*;
 
-import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -15,9 +14,9 @@ import android.support.annotation.Nullable;
 /**
  * Created by petr on 4/12/16.
  */
-public class RssFeederContentProvider extends ContentProvider {
+public class ContentProvider extends android.content.ContentProvider {
 
-    private RssFeederDatabaseHelper mRssFeederDatabaseHelper;
+    private DatabaseHelper mDatabaseHelper;
 
     public static final String AUTHORITY = "cz.cvut.panskpe1.rssfeeder";
 
@@ -42,7 +41,7 @@ public class RssFeederContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-        mRssFeederDatabaseHelper = new RssFeederDatabaseHelper(getContext());
+        mDatabaseHelper = new DatabaseHelper(getContext());
         return false;
     }
 
@@ -71,7 +70,7 @@ public class RssFeederContentProvider extends ContentProvider {
                 throw new IllegalArgumentException("Unknown URI: " + uri);
         }
 
-        SQLiteDatabase db = mRssFeederDatabaseHelper.getWritableDatabase();
+        SQLiteDatabase db = mDatabaseHelper.getWritableDatabase();
         Cursor cursor = queryBuilder.query(db, projection, selection, selectionArgs, null, null, sortOrder);
         cursor.setNotificationUri(getContext().getContentResolver(), uri);
 
@@ -86,7 +85,7 @@ public class RssFeederContentProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) throws SQLiteConstraintException {
         int uriType = sURIMatcher.match(uri);
-        SQLiteDatabase sqlDB = mRssFeederDatabaseHelper.getWritableDatabase();
+        SQLiteDatabase sqlDB = mDatabaseHelper.getWritableDatabase();
         String path;
         long id = 0;
         switch (uriType) {
@@ -108,7 +107,7 @@ public class RssFeederContentProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         int uriType = sURIMatcher.match(uri);
-        SQLiteDatabase sqlDB = mRssFeederDatabaseHelper.getWritableDatabase();
+        SQLiteDatabase sqlDB = mDatabaseHelper.getWritableDatabase();
         int rowsDeleted = 0;
         String id;
         switch (uriType) {
@@ -136,7 +135,7 @@ public class RssFeederContentProvider extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         int uriType = sURIMatcher.match(uri);
-        SQLiteDatabase sqlDB = mRssFeederDatabaseHelper.getWritableDatabase();
+        SQLiteDatabase sqlDB = mDatabaseHelper.getWritableDatabase();
         int rowsUpdated = 0;
         String id;
         switch (uriType) {

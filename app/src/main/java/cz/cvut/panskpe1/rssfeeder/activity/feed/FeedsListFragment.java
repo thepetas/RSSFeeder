@@ -6,14 +6,13 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
 import cz.cvut.panskpe1.rssfeeder.R;
-import cz.cvut.panskpe1.rssfeeder.data.RssFeederContentProvider;
+import cz.cvut.panskpe1.rssfeeder.data.ContentProvider;
 
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.ID;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.LINK;
@@ -53,7 +52,7 @@ public class FeedsListFragment extends Fragment implements LoaderManager.LoaderC
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case FEED_LOADER:
-                return new CursorLoader(getActivity(), RssFeederContentProvider.CONTENT_URI_FEED,
+                return new CursorLoader(getActivity(), ContentProvider.CONTENT_URI_FEED,
                         new String[]{ID, TITLE, LINK}, null, null, null);
             default:
                 break;

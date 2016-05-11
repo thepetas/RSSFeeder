@@ -62,11 +62,10 @@ public class AddFeedDialogFragment extends DialogFragment {
             builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    try {
-                        mListener.addFeed(mText.getText().toString());
+                    if (mListener.addFeed(mText.getText().toString())) {
                         Toast toast = Toast.makeText(getActivity(), R.string.feed_added_mess, Toast.LENGTH_LONG);
                         toast.show();
-                    } catch (SQLiteConstraintException ex) {
+                    } else {
                         Toast toast = Toast.makeText(getActivity(), R.string.feed_exists, Toast.LENGTH_LONG);
                         toast.show();
                     }
@@ -132,7 +131,7 @@ public class AddFeedDialogFragment extends DialogFragment {
     }
 
     public interface AddFeedDialogFragmentListener {
-        public void addFeed(String url);
+        public boolean addFeed(String url);
     }
 
 

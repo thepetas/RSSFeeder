@@ -37,6 +37,6 @@
     <string name="update_failed">Update failed</string>
     <string name="time_by_author">%1$s by %2$s</string>
     <string name="view_full_article">VIEW FULL ARTICLE</string>
-    <string name="articles_updated">#%s updated.</string>
+    <string name="successfully_updated">Successfully updated.</string>
 
 </resources>

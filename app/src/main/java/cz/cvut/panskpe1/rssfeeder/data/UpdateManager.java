@@ -1,9 +1,11 @@
 package cz.cvut.panskpe1.rssfeeder.data;
 
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteConstraintException;
+import android.net.Uri;
 import android.text.Html;
 import android.text.TextUtils;
 
@@ -19,7 +21,6 @@ import java.net.URL;
 import java.util.List;
 
 import cz.cvut.panskpe1.rssfeeder.R;
-import cz.cvut.panskpe1.rssfeeder.model.DateHelper;
 
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.AUTHOR;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.CONTENT;
@@ -36,68 +37,160 @@ import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.UPDATED;
  */
 public class UpdateManager {
 
-    public static int updateArticles(Context context) throws Exception {
-        int cntUpdated = 0;
-        Cursor cursor = context.getContentResolver().query(RssFeederContentProvider.CONTENT_URI_FEED,
-                null, null, null, null);
+    private ContentResolver mResolver;
+    private Resources mResources;
 
+    public UpdateManager(ContentResolver contentResolver, Resources res) {
+        this.mResolver = contentResolver;
+        this.mResources = res;
+    }
+
+    public boolean saveInitFeed(String url) {
+        String feedSelection = LINK + " = ?";
+        String[] feedSelectionArgs = {url};
+
+        Cursor savedFeed = mResolver.query(ContentProvider.CONTENT_URI_FEED, null, feedSelection,
+                feedSelectionArgs, null);
+
+        try {
+            if (savedFeed != null && savedFeed.getCount() > 0) {
+                return false;
+
+            } else {
+                ContentValues cv = new ContentValues();
+                cv.put(LINK, url);
+                cv.put(TITLE, mResources.getString(R.string.unknown_title));
+                cv.put(AUTHOR, mResources.getString(R.string.unknown_author));
+                mResolver.insert(ContentProvider.CONTENT_URI_FEED, cv);
+                return true;
+            }
+        } finally {
+            if (savedFeed != null)
+                savedFeed.close();
+        }
+    }
+
+    private void saveSyndFeed(String url, SyndFeed feed) {
+        long id = saveFeed(url, feed);
+        saveEntries(id, feed);
+    }
+
+    private long saveFeed(String url, SyndFeed feed) {
+        ContentValues feedValues = makeFeedWithData(feed);
+
+        String feedSelection = LINK + " = ?";
+        String[] feedSelectionArgs = {url};
+        Cursor savedFeed = mResolver.query(ContentProvider.CONTENT_URI_FEED, null, feedSelection,
+                feedSelectionArgs, null);
+
+        try {
+            if (savedFeed != null && savedFeed.moveToFirst()) {
+                long feedId = savedFeed.getLong(savedFeed.getColumnIndex(ID));
+                int titleIndex = savedFeed.getColumnIndex(TITLE);
+                if (savedFeed.getString(titleIndex).equals(mResources.getString(R.string.unknown_title))) {
+                    mResolver.update(ContentUris.withAppendedId(
+                            ContentProvider.CONTENT_URI_FEED, feedId), feedValues, null, null);
+                }
+                return feedId;
+            } else {
+                Uri feedUri = mResolver.insert(ContentProvider.CONTENT_URI_FEED, feedValues);
+                return ContentUris.parseId(feedUri);
+            }
+        } finally {
+            if (savedFeed != null) {
+                savedFeed.close();
+            }
+        }
+    }
+
+    private void saveEntries(long feedId, SyndFeed feed) {
+        List<SyndEntry> entries = feed.getEntries();
+        for (SyndEntry entry : entries) {
+            ContentValues entryValues = makeArticleWithData(entry, feedId);
+
+            String entrySelection = LINK + " = ?";
+            String[] entrySelectionArgs = {entry.getLink()};
+            Cursor savedEntry = mResolver.query(ContentProvider.CONTENT_URI_ARTICLE, null, entrySelection,
+                    entrySelectionArgs, null);
+            try {
+                if (savedEntry != null && savedEntry.getCount() > 0) {
+                    mResolver.update(ContentProvider.CONTENT_URI_ARTICLE, entryValues, entrySelection,
+                            entrySelectionArgs);
+                } else {
+                    mResolver.insert(ContentProvider.CONTENT_URI_ARTICLE, entryValues);
+                }
+            } finally {
+                if (savedEntry != null) {
+                    savedEntry.close();
+                }
+            }
+        }
+    }
+
+    public boolean updateAll() {
+        Cursor cursor = mResolver.query(ContentProvider.CONTENT_URI_FEED,
+                null, null, null, null);
         int urlIndex = cursor.getColumnIndex(LINK);
-        int idIndex = cursor.getColumnIndex(ID);
-        int titleIndex = cursor.getColumnIndex(TITLE);
 
         while (cursor.moveToNext()) {
             String url = cursor.getString(urlIndex);
             try {
                 URL feedSource = new URL(url);
-                SyndFeedInput input = new SyndFeedInput();
-                SyndFeed feed = input.build(new XmlReader(feedSource));
-
-                if (cursor.getString(titleIndex).equals(context.getResources().getString(R.string.unknown_title))) {
-                    context.getContentResolver().update(RssFeederContentProvider.CONTENT_URI_FEED,
-                            getFeedWithData(feed), DbConstants.ID + "=?", new String[]{cursor.getString(idIndex)});
-                }
-                int idFeed = cursor.getInt(idIndex);
-                List<SyndEntry> entries = feed.getEntries();
-
-                for (SyndEntry se : entries) {
-                    try {
-                        context.getContentResolver().insert(RssFeederContentProvider.CONTENT_URI_ARTICLE,
-                                getArticleWithData(se, idFeed));
-                        cntUpdated++;
-                    } catch (SQLiteConstraintException ex) {
-
-                    }
-                }
+                SyndFeed feed = new SyndFeedInput().build(new XmlReader(feedSource));
+                saveSyndFeed(url, feed);
+                deleteOldEntries(url);
             } catch (FeedException | IOException e) {
-                throw new Exception(context.getResources().getString(R.string.update_failed));
+                return false;
+            } finally {
+                cursor.close();
             }
         }
-        cursor.close();
-        return cntUpdated;
+        return true;
     }
 
-    private static ContentValues getFeedWithData(SyndFeed feed) {
+    private ContentValues makeFeedWithData(SyndFeed feed) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(AUTHOR, feed.getAuthor());
         contentValues.put(SUBTITLE, feed.getDescription());
         if (!TextUtils.isEmpty(feed.getAuthor())) {
             contentValues.put(TITLE, feed.getTitle());
         }
-        contentValues.put(UPDATED, DateHelper.convertMiliSecondsToDate(feed.getPublishedDate().getTime()));
+        contentValues.put(UPDATED, feed.getPublishedDate().getTime());
         return contentValues;
     }
 
-    private static ContentValues getArticleWithData(SyndEntry article, int feedId) {
+    private ContentValues makeArticleWithData(SyndEntry article, long feedId) {
         ContentValues contentValues = new ContentValues();
         contentValues.put(TITLE, article.getTitle());
         contentValues.put(AUTHOR, article.getAuthor());
         contentValues.put(FEED_ID, feedId);
         contentValues.put(LINK, article.getLink());
-        contentValues.put(UPDATED, DateHelper.convertMiliSecondsToDate(article.getPublishedDate().getTime()));
+        contentValues.put(UPDATED, article.getPublishedDate().getTime());
         SyndContent content = article.getDescription();
         contentValues.put(CONTENT, content.getValue());
         String summary = Html.fromHtml(content.getValue()).toString();
         contentValues.put(SUMMARY, summary);
         return contentValues;
+    }
+
+    public void deleteOldEntries(String feedLink) {
+        String feedSelection = LINK + " = ?";
+        String[] feedSelectionArgs = {feedLink};
+        Cursor savedFeed = mResolver.query(ContentProvider.CONTENT_URI_FEED, new String[]{ID},
+                feedSelection, feedSelectionArgs, null);
+        long feedId = -1;
+        if (savedFeed != null) {
+            if (savedFeed.moveToFirst()) {
+                feedId = savedFeed.getLong(savedFeed.getColumnIndex(ID));
+            }
+            savedFeed.close();
+        }
+
+        if (feedId >= 0) {
+            mResolver.delete(ContentProvider.CONTENT_URI_ARTICLE,
+                    FEED_ID + " = ? AND " + UPDATED + " < ?",
+                    new String[]{feedLink, String.valueOf(
+                            System.currentTimeMillis() - 3600 * 24 * 30 * 1000)});
+        }
     }
 }

@@ -2,7 +2,6 @@ package cz.cvut.panskpe1.rssfeeder.activity.main;
 
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -13,15 +12,13 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import cz.cvut.panskpe1.rssfeeder.R;
-import cz.cvut.panskpe1.rssfeeder.data.RssFeederContentProvider;
+import cz.cvut.panskpe1.rssfeeder.data.ContentProvider;
 
-import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.AUTHOR;
-import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.CONTENT;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.FEED_ID;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.ID;
-import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.LINK;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.SUMMARY;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.TITLE;
+import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.UPDATED;
 
 /**
  * Created by petr on 3/20/16.
@@ -57,8 +54,8 @@ public class ArticlesListFragment extends Fragment implements LoaderManager.Load
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case ARTICLE_LOADER:
-                return new CursorLoader(getActivity(), RssFeederContentProvider.CONTENT_URI_ARTICLE,
-                        new String[]{ID, TITLE, SUMMARY, FEED_ID}, null, null, null);
+                return new CursorLoader(getActivity(), ContentProvider.CONTENT_URI_ARTICLE,
+                        new String[]{ID, TITLE, SUMMARY, FEED_ID}, null, null, UPDATED + " DESC");
             default:
                 break;
         }
@@ -71,7 +68,6 @@ public class ArticlesListFragment extends Fragment implements LoaderManager.Load
         switch (loader.getId()) {
             case ARTICLE_LOADER:
                 mAdapter.changeCursor(data);
-//                mAdapter.swapCursor(data);
                 break;
             default:
                 break;
@@ -84,7 +80,6 @@ public class ArticlesListFragment extends Fragment implements LoaderManager.Load
         switch (loader.getId()) {
             case ARTICLE_LOADER:
                 mAdapter.changeCursor(null);
-//                mAdapter.swapCursor(null);
                 break;
             default:
                 break;

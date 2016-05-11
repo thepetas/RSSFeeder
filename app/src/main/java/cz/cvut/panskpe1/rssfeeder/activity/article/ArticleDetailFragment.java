@@ -19,8 +19,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import cz.cvut.panskpe1.rssfeeder.R;
-import cz.cvut.panskpe1.rssfeeder.data.RssFeederContentProvider;
-import cz.cvut.panskpe1.rssfeeder.model.DateHelper;
+import cz.cvut.panskpe1.rssfeeder.data.ContentProvider;
 import cz.cvut.panskpe1.rssfeeder.model.Feed;
 import cz.cvut.panskpe1.rssfeeder.model.FeedEntry;
 
@@ -76,7 +75,6 @@ public class ArticleDetailFragment extends Fragment {
             String author = mFeedEntry.getAuthor();
             if (TextUtils.isEmpty(author)) {
                 author = mFeedEntry.getFeed().getAuthor();
-                // TODO vyresit authora null
             }
 
             CharSequence relativeDate = DateUtils.getRelativeTimeSpanString(mFeedEntry.getUpdated());
@@ -104,7 +102,7 @@ public class ArticleDetailFragment extends Fragment {
         int id = getArguments().getInt(ARG_ENTRY_ID);
         Feed feed = null;
         Cursor cFeed = getActivity().getContentResolver().query(
-                Uri.withAppendedPath(RssFeederContentProvider.CONTENT_URI_FEED, String.valueOf(feedId)),
+                Uri.withAppendedPath(ContentProvider.CONTENT_URI_FEED, String.valueOf(feedId)),
                 null, null, null, null);
         if (cFeed.moveToNext()) {
             feed = new Feed(String.valueOf(id), cFeed.getString(cFeed.getColumnIndex(LINK)), cFeed.getString(cFeed.getColumnIndex(TITLE)));
@@ -114,7 +112,7 @@ public class ArticleDetailFragment extends Fragment {
 
         if (feed != null) {
             Cursor cArticle = getActivity().getContentResolver().query(
-                    Uri.withAppendedPath(RssFeederContentProvider.CONTENT_URI_ARTICLE, String.valueOf(id)),
+                    Uri.withAppendedPath(ContentProvider.CONTENT_URI_ARTICLE, String.valueOf(id)),
                     null, null, null, null);
 
             if (cArticle.moveToNext()) {
@@ -124,7 +122,7 @@ public class ArticleDetailFragment extends Fragment {
                         cArticle.getString(cArticle.getColumnIndex(LINK)));
                 mFeedEntry.setSummary(cArticle.getString(cArticle.getColumnIndex(SUMMARY)));
                 mFeedEntry.setContent(cArticle.getString(cArticle.getColumnIndex(CONTENT)));
-                mFeedEntry.setUpdated(DateHelper.getTimeInMiliSeconds(cArticle.getString(cArticle.getColumnIndex(UPDATED))));
+                mFeedEntry.setUpdated(cArticle.getLong(cArticle.getColumnIndex(UPDATED)));
                 mFeedEntry.setAuthor(cArticle.getString(cArticle.getColumnIndex(AUTHOR)));
             }
             cArticle.close();
