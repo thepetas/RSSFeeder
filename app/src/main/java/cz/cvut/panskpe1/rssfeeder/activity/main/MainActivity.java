@@ -10,16 +10,18 @@ import android.widget.Toast;
 
 import cz.cvut.panskpe1.rssfeeder.R;
 import cz.cvut.panskpe1.rssfeeder.activity.feed.FeedActivity;
+import cz.cvut.panskpe1.rssfeeder.service.DownloadService;
+import cz.cvut.panskpe1.rssfeeder.service.ScheduleBroadcastReceiver;
 
 /**
  * Created by petr on 3/19/16.
  */
-public class MainActivity extends Activity implements TaskFragment.TaskCallbacks {
+public class MainActivity extends Activity /*implements TaskFragment.TaskCallbacks*/ {
 
     private static final String TAG = "MAIN_ACTIVITY";
     private static final String TASK_FRAGMENT = "TaskFragment";
 
-    private MenuItem mRefreshMenuItem;
+    //    private MenuItem mRefreshMenuItem;
     private TaskFragment mTaskFragment;
 
     @Override
@@ -36,8 +38,14 @@ public class MainActivity extends Activity implements TaskFragment.TaskCallbacks
         }
     }
 
-
     @Override
+    protected void onStart() {
+        Intent intent = new Intent(ScheduleBroadcastReceiver.SCHEDULE);
+        sendBroadcast(intent);
+        super.onStart();
+    }
+
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
 
@@ -48,9 +56,9 @@ public class MainActivity extends Activity implements TaskFragment.TaskCallbacks
             setRefreshing();
         }
         return true;
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.feeds_item:
@@ -59,6 +67,7 @@ public class MainActivity extends Activity implements TaskFragment.TaskCallbacks
                 return true;
             case R.id.update_item:
                 mTaskFragment.executeTask();
+                Intent i = new Intent(this, DownloadService.class);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -98,5 +107,6 @@ public class MainActivity extends Activity implements TaskFragment.TaskCallbacks
     @Override
     public void updateProgress() {
         setRefreshing();
-    }
+    }*/
+
 }
