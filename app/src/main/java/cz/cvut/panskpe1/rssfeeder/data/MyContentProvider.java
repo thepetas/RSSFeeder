@@ -14,7 +14,7 @@ import android.support.annotation.Nullable;
 /**
  * Created by petr on 4/12/16.
  */
-public class ContentProvider extends android.content.ContentProvider {
+public class MyContentProvider extends android.content.ContentProvider {
 
     private DatabaseHelper mDatabaseHelper;
 

@@ -15,7 +15,6 @@ import cz.cvut.panskpe1.rssfeeder.R;
  */
 public class ArticleDetailActivity extends Activity {
 
-    public static final String FEED_ID = "feed_id";
     public static final String ENTRY_ID = "entry_id";
 
     @Override
@@ -40,23 +39,8 @@ public class ArticleDetailActivity extends Activity {
 
     private Fragment createArticleDetailFragment() {
         Bundle args = new Bundle();
-        args.putInt(ArticleDetailFragment.ARG_FEED_ID,
-                getIntent().getIntExtra(FEED_ID, 0));
-        args.putInt(ArticleDetailFragment.ARG_ENTRY_ID,
-                getIntent().getIntExtra(ENTRY_ID, 0));
+        args.putLong(ArticleDetailFragment.ARG_ENTRY_ID,
+                getIntent().getLongExtra(ENTRY_ID, 0));
         return Fragment.instantiate(this, ArticleDetailFragment.class.getName(), args);
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                finish();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-
 }

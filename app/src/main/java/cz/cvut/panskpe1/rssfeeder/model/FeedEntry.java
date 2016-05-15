@@ -7,14 +7,14 @@ public class FeedEntry {
 
     private Feed mFeed;
     private String mTitle;
-    private String mId;
+    private long mId;
     private String mLink;
     private long mUpdated;
     private String mSummary;
     private String mContent;
     private String mAuthor;
 
-    public FeedEntry(Feed feed, String title, String id, String link) {
+    public FeedEntry(Feed feed, String title, long id, String link) {
         mFeed = feed;
         mTitle = title;
         mId = id;
@@ -37,11 +37,11 @@ public class FeedEntry {
         this.mTitle = mTitle;
     }
 
-    public String getId() {
+    public long getId() {
         return mId;
     }
 
-    public void setId(String mId) {
+    public void setId(long mId) {
         this.mId = mId;
     }
 

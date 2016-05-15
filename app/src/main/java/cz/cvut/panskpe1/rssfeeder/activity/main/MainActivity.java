@@ -1,112 +1,114 @@
 package cz.cvut.panskpe1.rssfeeder.activity.main;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Toast;
 
 import cz.cvut.panskpe1.rssfeeder.R;
-import cz.cvut.panskpe1.rssfeeder.activity.feed.FeedActivity;
-import cz.cvut.panskpe1.rssfeeder.service.DownloadService;
+import cz.cvut.panskpe1.rssfeeder.activity.article.ArticleDetailActivity;
+import cz.cvut.panskpe1.rssfeeder.activity.article.ArticleDetailFragment;
 import cz.cvut.panskpe1.rssfeeder.service.ScheduleBroadcastReceiver;
 
 /**
  * Created by petr on 3/19/16.
  */
-public class MainActivity extends Activity /*implements TaskFragment.TaskCallbacks*/ {
+public class MainActivity extends Activity implements ArticlesListFragment.ArticleListFragmentCallback {
 
     private static final String TAG = "MAIN_ACTIVITY";
-    private static final String TASK_FRAGMENT = "TaskFragment";
-
-    //    private MenuItem mRefreshMenuItem;
-    private TaskFragment mTaskFragment;
+    private boolean isXlarge;
+//    private static final String TASK_FRAGMENT = "TaskFragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (savedInstanceState == null)
+            addMainFragment();
 
-        FragmentManager fm = getFragmentManager();
-        mTaskFragment = (TaskFragment) fm.findFragmentByTag(TASK_FRAGMENT);
+        if (findViewById(R.id.detailFragment) != null) {
+            isXlarge = true;
+            addArticleDetailFragment();
+        } else
+            isXlarge = false;
+    }
 
-        if (mTaskFragment == null) {
-            mTaskFragment = new TaskFragment();
-            fm.beginTransaction().add(mTaskFragment, TASK_FRAGMENT).commit();
+    private void addArticleDetailFragment() {
+        FragmentManager manager = getFragmentManager();
+        if (manager.findFragmentById(R.id.detailFragment) == null) {
+            FragmentTransaction transaction = manager.beginTransaction();
+            transaction.add(R.id.detailFragment, createArticleDetailFragment());
+            transaction.commit();
         }
+    }
+
+    private Fragment createArticleDetailFragment() {
+        Bundle args = new Bundle();
+        args.putLong(ArticleDetailFragment.ARG_ENTRY_ID,
+                getIntent().getLongExtra(ArticleDetailActivity.ENTRY_ID, 1));
+        return Fragment.instantiate(this, ArticleDetailFragment.class.getName(), args);
+    }
+
+    private void addMainFragment() {
+        getFragmentManager().beginTransaction()
+                .add(R.id.containerMainActivity, new ArticlesListFragment())
+                .commit();
+    }
+
+    @Override
+    protected void onStop() {
+//        if (mService != null) {
+//            unbindService(mConnection);
+//        }
+        super.onStop();
     }
 
     @Override
     protected void onStart() {
         Intent intent = new Intent(ScheduleBroadcastReceiver.SCHEDULE);
         sendBroadcast(intent);
+        if (isXlarge) {
+            ArticlesListFragment list = (ArticlesListFragment) getFragmentManager().findFragmentById(R.id.containerMainActivity);
+            ArticleDetailFragment fragment = (ArticleDetailFragment) getFragmentManager().findFragmentById(R.id.detailFragment);
+            fragment.fillData(list.getActualArticleId());
+        }
+//        Intent intentBind = new Intent(this, DownloadService.class);
+//        bindService(intentBind, mConnection, Context.BIND_AUTO_CREATE);
         super.onStart();
+//        Toast.makeText(this, getSizeName(this), Toast.LENGTH_LONG).show();
     }
 
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
+    private String getSizeName() {
+        int screenLayout = this.getResources().getConfiguration().screenLayout;
+        screenLayout &= Configuration.SCREENLAYOUT_SIZE_MASK;
 
-        if (mRefreshMenuItem == null)
-            mRefreshMenuItem = menu.findItem(R.id.update_item);
-
-        if (mTaskFragment.isRunning()) {
-            setRefreshing();
-        }
-        return true;
-    }*/
-
-    /*@Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.feeds_item:
-                Intent intent = new Intent(this, FeedActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.update_item:
-                mTaskFragment.executeTask();
-                Intent i = new Intent(this, DownloadService.class);
-                return true;
+        switch (screenLayout) {
+            case Configuration.SCREENLAYOUT_SIZE_SMALL:
+                return "small";
+            case Configuration.SCREENLAYOUT_SIZE_NORMAL:
+                return "normal";
+            case Configuration.SCREENLAYOUT_SIZE_LARGE:
+                return "large";
+            case 4:
+                return "xlarge";
             default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void setRefreshing() {
-        mRefreshMenuItem.setActionView(R.layout.action_progressbar);
-        mRefreshMenuItem.expandActionView();
-    }
-
-    private void setStop() {
-        if (mRefreshMenuItem.getActionView() != null) {
-            mRefreshMenuItem.collapseActionView();
-            mRefreshMenuItem.setActionView(null);
+                return "undefined";
         }
     }
 
     @Override
-    public void onPreExecute() {
-        setRefreshing();
-    }
-
-    @Override
-    public void onPostExecute(boolean number) {
-        if (!number) {
-            Toast toast = Toast.makeText(this, R.string.update_failed, Toast.LENGTH_LONG);
-            toast.show();
+    public void onArticleClick(long id) {
+        if (isXlarge) {
+            ArticleDetailFragment fragment = (ArticleDetailFragment) getFragmentManager().findFragmentById(R.id.detailFragment);
+            fragment.fillData(id);
         } else {
-            Toast toast = Toast.makeText(this, R.string.successfully_updated, Toast.LENGTH_LONG);
-            toast.show();
-
+            Intent intent = new Intent(this, ArticleDetailActivity.class);
+            intent.putExtra(ArticleDetailActivity.ENTRY_ID, id);
+            startActivity(intent);
         }
-        setStop();
     }
-
-    @Override
-    public void updateProgress() {
-        setRefreshing();
-    }*/
 
 }

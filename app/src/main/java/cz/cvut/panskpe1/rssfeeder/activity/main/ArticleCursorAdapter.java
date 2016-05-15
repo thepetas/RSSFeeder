@@ -25,12 +25,24 @@ public class ArticleCursorAdapter extends CursorAdapter {
     private LayoutInflater mInflater;
     private Context mContext;
     private static final String TAG = "ARTTICLE_CURSOR_ADAPTER";
+    private int mTitleColumn;
+    private int mSummaryColumn;
 
-    public ArticleCursorAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
+    public ArticleCursorAdapter(Context context, Cursor c) {
+        super(context, c, false);
         mInflater = LayoutInflater.from(context);
         mContext = context;
+        setColumns(c);
     }
+
+    private void setColumns(Cursor cursor){
+        if (cursor != null) {
+            mTitleColumn = cursor.getColumnIndex(TITLE);
+            mSummaryColumn = cursor.getColumnIndex(SUMMARY);
+        }
+    }
+
+
 
     private class ViewHolder {
         TextView title;
@@ -58,6 +70,7 @@ public class ArticleCursorAdapter extends CursorAdapter {
         sum = sum.substring(0, 100).trim();
         holder.summary.setText(sum);
 
+        /*
         final int id = cursor.getInt(cursor.getColumnIndex(ID));
         final int feedId = cursor.getInt(cursor.getColumnIndex(FEED_ID));
 
@@ -69,7 +82,13 @@ public class ArticleCursorAdapter extends CursorAdapter {
                 intent.putExtra(ArticleDetailActivity.FEED_ID, feedId);
                 mContext.startActivity(intent);
             }
-        });
+        });*/
     }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
 
 }

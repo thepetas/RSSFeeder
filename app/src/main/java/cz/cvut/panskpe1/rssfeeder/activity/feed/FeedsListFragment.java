@@ -12,7 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import cz.cvut.panskpe1.rssfeeder.R;
-import cz.cvut.panskpe1.rssfeeder.data.ContentProvider;
+import cz.cvut.panskpe1.rssfeeder.data.MyContentProvider;
 
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.ID;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.LINK;
@@ -52,7 +52,7 @@ public class FeedsListFragment extends Fragment implements LoaderManager.LoaderC
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
             case FEED_LOADER:
-                return new CursorLoader(getActivity(), ContentProvider.CONTENT_URI_FEED,
+                return new CursorLoader(getActivity(), MyContentProvider.CONTENT_URI_FEED,
                         new String[]{ID, TITLE, LINK}, null, null, null);
             default:
                 break;

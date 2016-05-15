@@ -1,16 +1,23 @@
 package cz.cvut.panskpe1.rssfeeder.activity.main;
 
+import android.app.Activity;
 import android.app.Fragment;
+import android.app.ListFragment;
 import android.app.LoaderManager;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.ServiceConnection;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,8 +28,10 @@ import android.view.ViewGroup;
 import android.widget.ListView;
 
 import cz.cvut.panskpe1.rssfeeder.R;
+import cz.cvut.panskpe1.rssfeeder.activity.article.ArticleDetailActivity;
 import cz.cvut.panskpe1.rssfeeder.activity.feed.FeedActivity;
-import cz.cvut.panskpe1.rssfeeder.data.ContentProvider;
+import cz.cvut.panskpe1.rssfeeder.data.MyContentProvider;
+import cz.cvut.panskpe1.rssfeeder.service.AlarmBroadcastReceiver;
 import cz.cvut.panskpe1.rssfeeder.service.DownloadService;
 
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.FEED_ID;
@@ -34,101 +43,63 @@ import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.UPDATED;
 /**
  * Created by petr on 3/20/16.
  */
-public class ArticlesListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ArticlesListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final int ARTICLE_LOADER = 1;
-    private ListView mListView;
     private ArticleCursorAdapter mAdapter;
-    private DownloadService mService;
     private MenuItem mRefreshMenuItem;
-    private boolean isRef = false;
+    private DownloadService mService;
+    private ArticleListFragmentCallback mCallback;
+    private int actualPosition = 1;
+
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.list_fragment, container, false);
-        return view;
+    public void onAttach(Activity context) {
+        super.onAttach(context);
+        try {
+            mCallback = (ArticleListFragmentCallback) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement ListListener");
+        }
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallback = null;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
         setHasOptionsMenu(true);
-        getLoaderManager().initLoader(ARTICLE_LOADER, null, this);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        setListAdapter(mAdapter);
+//        TODO blablabla
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mAdapter = new ArticleCursorAdapter(getActivity(), null, 0);
-        mListView = (ListView) getActivity().findViewById(R.id.database_content);
-        mListView.setAdapter(mAdapter);
+        getLoaderManager().initLoader(ARTICLE_LOADER, null, this);
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case ARTICLE_LOADER:
-                return new CursorLoader(getActivity(), ContentProvider.CONTENT_URI_ARTICLE,
-                        new String[]{ID, TITLE, SUMMARY, FEED_ID}, null, null, UPDATED + " DESC");
-            default:
-                break;
-        }
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.main, menu);
 
-        return null;
-    }
+        if (mRefreshMenuItem == null)
+            mRefreshMenuItem = menu.findItem(R.id.update_item);
 
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        switch (loader.getId()) {
-            case ARTICLE_LOADER:
-                mAdapter.changeCursor(data);
-                break;
-            default:
-                break;
-        }
+//        if (mTaskFragment.isRunning()) {
+//            refreshingStart();
+//        }
 
-    }
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        switch (loader.getId()) {
-            case ARTICLE_LOADER:
-                mAdapter.changeCursor(null);
-                break;
-            default:
-                break;
-        }
-    }
-
-    ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.i("ARTICLE_LIST_FRAGMENT", "Service is connected..");
-            DownloadService.MyBinder binder = (DownloadService.MyBinder) service;
-            mService = binder.getServiceInstance();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.i("ARTICLE_LIST_FRAGMENT", "Service is disconnected..");
-            mService = null;
-        }
-    };
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Intent intent = new Intent(getActivity(), DownloadService.class);
-        getActivity().bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mService != null) {
-            getActivity().unbindService(mConnection);
-        }
     }
 
     @Override
@@ -139,36 +110,123 @@ public class ArticlesListFragment extends Fragment implements LoaderManager.Load
                 startActivity(intent);
                 return true;
             case R.id.update_item:
-                mService.updateAll();
-                if (!isRef) {
-                    starRefreshing();
-                } else {
-                    stopRefreshing();
-                }
-                isRef = !isRef;
+                AlarmBroadcastReceiver.startService(getActivity());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main, menu);
-
-        if (mRefreshMenuItem == null)
-            mRefreshMenuItem = menu.findItem(R.id.update_item);
-    }
-
-    private void starRefreshing() {
+    public void refreshingStart() {
         mRefreshMenuItem.setActionView(R.layout.action_progressbar);
         mRefreshMenuItem.expandActionView();
     }
 
-    private void stopRefreshing() {
+    public void refreshingStop() {
         if (mRefreshMenuItem.getActionView() != null) {
             mRefreshMenuItem.collapseActionView();
             mRefreshMenuItem.setActionView(null);
         }
+    }
+
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i("ARTICLE_LIST_FRAGMENT", "Service is connected..");
+            mService = (DownloadService) ((DownloadService.MyBinder) service).getServiceInstance();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i("ARTICLE_LIST_FRAGMENT", "Service is disconnected..");
+            mService = null;
+        }
+    };
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case ARTICLE_LOADER:
+                return new CursorLoader(getActivity(), MyContentProvider.CONTENT_URI_ARTICLE,
+                        new String[]{ID, TITLE, SUMMARY, FEED_ID}, null, null, UPDATED + " DESC");
+            default:
+                break;
+        }
+
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        if (!isAdded())
+            return;
+
+        if (loader.getId() == ARTICLE_LOADER) {
+            if (mAdapter == null) {
+                mAdapter = new ArticleCursorAdapter(getActivity(), data);
+                setListAdapter(mAdapter);
+            }
+            mAdapter.changeCursor(data);
+        }
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        if (loader.getId() == ARTICLE_LOADER) {
+            mAdapter.changeCursor(null);
+        }
+    }
+
+    private BroadcastReceiver refreshStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int state = intent.getIntExtra(DownloadService.STATE, -1);
+            switch (state) {
+                case DownloadService.STATE_STARTED:
+                    refreshingStart();
+                    break;
+                case DownloadService.STATE_FINISHED:
+                    refreshingStop();
+                    break;
+            }
+        }
+    };
+
+    @Override
+    public void onResume() {
+        Intent intentBind = new Intent(getActivity(), DownloadService.class);
+        getActivity().bindService(intentBind, mConnection, Context.BIND_AUTO_CREATE);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(refreshStateReceiver, new IntentFilter(DownloadService.BROADCAST_REFRESH));
+        super.onResume();
+    }
+
+    public int getActualArticleId() {
+//        TODO predelat misto poradi na tag
+        return actualPosition + 1;
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        actualPosition = position;
+        Log.i("FR", String.valueOf(getSelectedItemPosition()));
+        Log.i("FR", String.valueOf(position));
+        Cursor entry = (Cursor) mAdapter.getItem(position);
+        int idColumn = entry.getColumnIndex(ID);
+        mCallback.onArticleClick(entry.getLong(idColumn));
+    }
+
+    @Override
+    public void onPause() {
+        if (mService != null) {
+            getActivity().unbindService(mConnection);
+        }
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(refreshStateReceiver);
+        super.onPause();
+    }
+
+    public static interface ArticleListFragmentCallback {
+        public void onArticleClick(long entryId);
+
     }
 }

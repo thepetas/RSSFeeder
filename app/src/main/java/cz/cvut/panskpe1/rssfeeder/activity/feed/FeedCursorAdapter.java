@@ -13,7 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import cz.cvut.panskpe1.rssfeeder.R;
-import cz.cvut.panskpe1.rssfeeder.data.ContentProvider;
+import cz.cvut.panskpe1.rssfeeder.data.MyContentProvider;
 
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.FEED_ID;
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.ID;
@@ -87,8 +87,8 @@ public class FeedCursorAdapter extends CursorAdapter {
     }
 
     private void deleteFeedWithArticles(String id) {
-        mContext.getContentResolver().delete(Uri.withAppendedPath(ContentProvider.CONTENT_URI_FEED, id), null, null);
-        mContext.getContentResolver().delete(ContentProvider.CONTENT_URI_ARTICLE, FEED_ID + "= ?",
+        mContext.getContentResolver().delete(Uri.withAppendedPath(MyContentProvider.CONTENT_URI_FEED, id), null, null);
+        mContext.getContentResolver().delete(MyContentProvider.CONTENT_URI_ARTICLE, FEED_ID + "= ?",
                 new String[]{id});
     }
 

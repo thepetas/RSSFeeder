@@ -49,7 +49,7 @@ public class UpdateManager {
         String feedSelection = LINK + " = ?";
         String[] feedSelectionArgs = {url};
 
-        Cursor savedFeed = mResolver.query(ContentProvider.CONTENT_URI_FEED, null, feedSelection,
+        Cursor savedFeed = mResolver.query(MyContentProvider.CONTENT_URI_FEED, null, feedSelection,
                 feedSelectionArgs, null);
 
         try {
@@ -61,7 +61,7 @@ public class UpdateManager {
                 cv.put(LINK, url);
                 cv.put(TITLE, mResources.getString(R.string.unknown_title));
                 cv.put(AUTHOR, mResources.getString(R.string.unknown_author));
-                mResolver.insert(ContentProvider.CONTENT_URI_FEED, cv);
+                mResolver.insert(MyContentProvider.CONTENT_URI_FEED, cv);
                 return true;
             }
         } finally {
@@ -80,7 +80,7 @@ public class UpdateManager {
 
         String feedSelection = LINK + " = ?";
         String[] feedSelectionArgs = {url};
-        Cursor savedFeed = mResolver.query(ContentProvider.CONTENT_URI_FEED, null, feedSelection,
+        Cursor savedFeed = mResolver.query(MyContentProvider.CONTENT_URI_FEED, null, feedSelection,
                 feedSelectionArgs, null);
 
         try {
@@ -89,11 +89,11 @@ public class UpdateManager {
                 int titleIndex = savedFeed.getColumnIndex(TITLE);
                 if (savedFeed.getString(titleIndex).equals(mResources.getString(R.string.unknown_title))) {
                     mResolver.update(ContentUris.withAppendedId(
-                            ContentProvider.CONTENT_URI_FEED, feedId), feedValues, null, null);
+                            MyContentProvider.CONTENT_URI_FEED, feedId), feedValues, null, null);
                 }
                 return feedId;
             } else {
-                Uri feedUri = mResolver.insert(ContentProvider.CONTENT_URI_FEED, feedValues);
+                Uri feedUri = mResolver.insert(MyContentProvider.CONTENT_URI_FEED, feedValues);
                 return ContentUris.parseId(feedUri);
             }
         } finally {
@@ -110,14 +110,14 @@ public class UpdateManager {
 
             String entrySelection = LINK + " = ?";
             String[] entrySelectionArgs = {entry.getLink()};
-            Cursor savedEntry = mResolver.query(ContentProvider.CONTENT_URI_ARTICLE, null, entrySelection,
+            Cursor savedEntry = mResolver.query(MyContentProvider.CONTENT_URI_ARTICLE, null, entrySelection,
                     entrySelectionArgs, null);
             try {
                 if (savedEntry != null && savedEntry.getCount() > 0) {
-                    mResolver.update(ContentProvider.CONTENT_URI_ARTICLE, entryValues, entrySelection,
+                    mResolver.update(MyContentProvider.CONTENT_URI_ARTICLE, entryValues, entrySelection,
                             entrySelectionArgs);
                 } else {
-                    mResolver.insert(ContentProvider.CONTENT_URI_ARTICLE, entryValues);
+                    mResolver.insert(MyContentProvider.CONTENT_URI_ARTICLE, entryValues);
                 }
             } finally {
                 if (savedEntry != null) {
@@ -128,7 +128,7 @@ public class UpdateManager {
     }
 
     public boolean updateAll() {
-        Cursor cursor = mResolver.query(ContentProvider.CONTENT_URI_FEED,
+        Cursor cursor = mResolver.query(MyContentProvider.CONTENT_URI_FEED,
                 null, null, null, null);
         int urlIndex = cursor.getColumnIndex(LINK);
 
@@ -176,7 +176,7 @@ public class UpdateManager {
     public void deleteOldEntries(String feedLink) {
         String feedSelection = LINK + " = ?";
         String[] feedSelectionArgs = {feedLink};
-        Cursor savedFeed = mResolver.query(ContentProvider.CONTENT_URI_FEED, new String[]{ID},
+        Cursor savedFeed = mResolver.query(MyContentProvider.CONTENT_URI_FEED, new String[]{ID},
                 feedSelection, feedSelectionArgs, null);
         long feedId = -1;
         if (savedFeed != null) {
@@ -187,7 +187,7 @@ public class UpdateManager {
         }
 
         if (feedId >= 0) {
-            mResolver.delete(ContentProvider.CONTENT_URI_ARTICLE,
+            mResolver.delete(MyContentProvider.CONTENT_URI_ARTICLE,
                     FEED_ID + " = ? AND " + UPDATED + " < ?",
                     new String[]{feedLink, String.valueOf(
                             System.currentTimeMillis() - 3600 * 24 * 30 * 1000)});

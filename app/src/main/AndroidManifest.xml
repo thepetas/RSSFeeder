@@ -38,7 +38,7 @@
         </activity>
 
         <provider
-            android:name=".data.ContentProvider"
+            android:name=".data.MyContentProvider"
             android:authorities="cz.cvut.panskpe1.rssfeeder"
             android:exported="false" />
         <service
