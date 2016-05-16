@@ -27,6 +27,7 @@ public class ArticleCursorAdapter extends CursorAdapter {
     private static final String TAG = "ARTTICLE_CURSOR_ADAPTER";
     private int mTitleColumn;
     private int mSummaryColumn;
+    private int mIdColumn;
 
     public ArticleCursorAdapter(Context context, Cursor c) {
         super(context, c, false);
@@ -35,14 +36,13 @@ public class ArticleCursorAdapter extends CursorAdapter {
         setColumns(c);
     }
 
-    private void setColumns(Cursor cursor){
+    private void setColumns(Cursor cursor) {
         if (cursor != null) {
             mTitleColumn = cursor.getColumnIndex(TITLE);
             mSummaryColumn = cursor.getColumnIndex(SUMMARY);
+            mIdColumn = cursor.getColumnIndex(ID);
         }
     }
-
-
 
     private class ViewHolder {
         TextView title;
@@ -59,6 +59,7 @@ public class ArticleCursorAdapter extends CursorAdapter {
         View view = mInflater.inflate(R.layout.item_entry, parent, false);
         ViewHolder holder = new ViewHolder(view);
         view.setTag(holder);
+        view.setId((int) cursor.getLong(mIdColumn));
         return view;
     }
 
@@ -69,26 +70,5 @@ public class ArticleCursorAdapter extends CursorAdapter {
         String sum = cursor.getString(cursor.getColumnIndex(SUMMARY));
         sum = sum.substring(0, 100).trim();
         holder.summary.setText(sum);
-
-        /*
-        final int id = cursor.getInt(cursor.getColumnIndex(ID));
-        final int feedId = cursor.getInt(cursor.getColumnIndex(FEED_ID));
-
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(mContext, ArticleDetailActivity.class);
-                intent.putExtra(ArticleDetailActivity.ENTRY_ID, id);
-                intent.putExtra(ArticleDetailActivity.FEED_ID, feedId);
-                mContext.startActivity(intent);
-            }
-        });*/
     }
-
-    @Override
-    public long getItemId(int position) {
-        return position;
-    }
-
-
 }

@@ -1,7 +1,5 @@
 package cz.cvut.panskpe1.rssfeeder.data;
 
-import cz.cvut.panskpe1.rssfeeder.model.Feed;
-
 /**
  * Created by petr on 4/12/16.
  */

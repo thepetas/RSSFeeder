@@ -7,6 +7,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.util.Log;
 
 import cz.cvut.panskpe1.rssfeeder.R;
 import cz.cvut.panskpe1.rssfeeder.activity.article.ArticleDetailActivity;
@@ -73,7 +74,7 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
         if (isXlarge) {
             ArticlesListFragment list = (ArticlesListFragment) getFragmentManager().findFragmentById(R.id.containerMainActivity);
             ArticleDetailFragment fragment = (ArticleDetailFragment) getFragmentManager().findFragmentById(R.id.detailFragment);
-            fragment.fillData(list.getActualArticleId());
+            fragment.fillData(list.getLastId());
         }
 //        Intent intentBind = new Intent(this, DownloadService.class);
 //        bindService(intentBind, mConnection, Context.BIND_AUTO_CREATE);

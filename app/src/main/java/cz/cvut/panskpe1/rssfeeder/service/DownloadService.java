@@ -1,6 +1,6 @@
 package cz.cvut.panskpe1.rssfeeder.service;
 
-import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Binder;
@@ -9,7 +9,6 @@ import android.os.SystemClock;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import cz.cvut.panskpe1.rssfeeder.activity.main.ArticlesListFragment;
 import cz.cvut.panskpe1.rssfeeder.data.UpdateManager;
 
 /**
@@ -17,13 +16,14 @@ import cz.cvut.panskpe1.rssfeeder.data.UpdateManager;
  */
 public class DownloadService extends IntentService {
 
-    //    public static long DOWNLOAD_INTERVAL = AlarmManager.INTERVAL_HOUR * 5;
-    public static long DOWNLOAD_INTERVAL = 1000 * 50;
+    public static long DOWNLOAD_INTERVAL = AlarmManager.INTERVAL_HOUR * 5;
+    //    public static long DOWNLOAD_INTERVAL = 1000 * 50;
     private static String TAG = "DownloadService";
 
     public static final String BROADCAST_REFRESH = "rss_reader_refresh";
     public static final int STATE_STARTED = 0;
-    public static final int STATE_FINISHED = 2;
+    public static final int STATE_FINISHED_OK = 1;
+    public static final int STATE_FINISHED_FAIL = 2;
     public static final String STATE = "STATUS_REFRESH";
 
     IBinder mBinder = new MyBinder();
@@ -48,14 +48,18 @@ public class DownloadService extends IntentService {
         Log.i(TAG, "Starting update");
 
         UpdateManager updateManager = new UpdateManager(getContentResolver(), getResources());
-        updateManager.updateAll();
+        boolean res = updateManager.updateAll();
         for (int i = 0; i < 6; i++) {
+            publishChange(STATE_STARTED);
             Log.i(TAG, "Time: " + (i + 1) + "/6");
             SystemClock.sleep(1000);
         }
 
         Log.i(TAG, "Ending update");
-        publishChange(STATE_FINISHED);
+        if (res)
+            publishChange(STATE_FINISHED_OK);
+        else
+            publishChange(STATE_FINISHED_FAIL);
     }
 
     private void publishChange(int num) {

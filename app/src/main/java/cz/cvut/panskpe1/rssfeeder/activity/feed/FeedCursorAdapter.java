@@ -28,12 +28,21 @@ public class FeedCursorAdapter extends CursorAdapter {
 
     private LayoutInflater mInflater;
     private Context mContext;
-    private static final String TAG = "FEED_CURSOR_ADAPTER";
+    private int mTitleColumn;
+    private int mLinkColumn;
 
-    public FeedCursorAdapter(Context context, Cursor c, int flags) {
-        super(context, c, flags);
+    public FeedCursorAdapter(Context context, Cursor c) {
+        super(context, c, false);
         mInflater = LayoutInflater.from(context);
         mContext = context;
+        initColumns(c);
+    }
+
+    private void initColumns(Cursor cursor) {
+        if (cursor != null) {
+            mTitleColumn = cursor.getColumnIndex(TITLE);
+            mLinkColumn = cursor.getColumnIndex(LINK);
+        }
     }
 
     private class ViewHolder {
@@ -57,40 +66,13 @@ public class FeedCursorAdapter extends CursorAdapter {
     @Override
     public void bindView(View view, Context context, final Cursor cursor) {
         ViewHolder holder = (ViewHolder) view.getTag();
-        holder.title.setText(cursor.getString(cursor.getColumnIndex(TITLE)));
-        holder.link.setText(cursor.getString(cursor.getColumnIndex(LINK)));
-
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                builder.setTitle(R.string.delete_feed_title);
-                builder.setMessage(R.string.delete_feed_mess)
-                        .setCancelable(false)
-                        .setPositiveButton(R.string.Delete, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                deleteFeedWithArticles(cursor.getString(cursor.getColumnIndex(ID)));
-                                Toast toast = Toast.makeText(mContext, R.string.feed_deleted_mess, Toast.LENGTH_LONG);
-                                toast.show();
-                            }
-                        })
-                        .setNegativeButton(R.string.Cancel, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        });
-                AlertDialog alert = builder.create();
-                alert.show();
-            }
-        });
+        holder.title.setText(cursor.getString(mTitleColumn));
+        holder.link.setText(cursor.getString(mLinkColumn));
     }
 
-    private void deleteFeedWithArticles(String id) {
-        mContext.getContentResolver().delete(Uri.withAppendedPath(MyContentProvider.CONTENT_URI_FEED, id), null, null);
-        mContext.getContentResolver().delete(MyContentProvider.CONTENT_URI_ARTICLE, FEED_ID + "= ?",
-                new String[]{id});
-    }
-
-
+//    private void deleteFeedWithArticles(String id) {
+//        mContext.getContentResolver().delete(Uri.withAppendedPath(MyContentProvider.CONTENT_URI_FEED, id), null, null);
+//        mContext.getContentResolver().delete(MyContentProvider.CONTENT_URI_ARTICLE, FEED_ID + "= ?",
+//                new String[]{id});
+//    }
 }

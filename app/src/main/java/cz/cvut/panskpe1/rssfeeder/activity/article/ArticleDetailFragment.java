@@ -128,8 +128,7 @@ public class ArticleDetailFragment extends Fragment {
             mFeedEntry.setUpdated(cArticle.getLong(cArticle.getColumnIndex(UPDATED)));
             mFeedEntry.setAuthor(cArticle.getString(cArticle.getColumnIndex(AUTHOR)));
         }
-//        }
-
+        mFeedEntry = null;
     }
 
     @Override

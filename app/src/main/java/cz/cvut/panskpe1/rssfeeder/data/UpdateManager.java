@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.text.Html;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.google.code.rome.android.repackaged.com.sun.syndication.feed.synd.SyndContent;
 import com.google.code.rome.android.repackaged.com.sun.syndication.feed.synd.SyndEntry;
@@ -132,18 +133,19 @@ public class UpdateManager {
                 null, null, null, null);
         int urlIndex = cursor.getColumnIndex(LINK);
 
-        while (cursor.moveToNext()) {
-            String url = cursor.getString(urlIndex);
-            try {
+        try {
+            while (cursor.moveToNext()) {
+                String url = cursor.getString(urlIndex);
+                Log.i("UM", "URL: " + url);
                 URL feedSource = new URL(url);
                 SyndFeed feed = new SyndFeedInput().build(new XmlReader(feedSource));
                 saveSyndFeed(url, feed);
                 deleteOldEntries(url);
-            } catch (FeedException | IOException e) {
-                return false;
-            } finally {
-                cursor.close();
             }
+        } catch (Exception e) {
+            return false;
+        } finally {
+            cursor.close();
         }
         return true;
     }

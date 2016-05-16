@@ -23,8 +23,8 @@
     <string name="save">Save</string>
     <string name="back">Back</string>
     <string name="delete_feed_mess">Do you want to delete this feed?</string>
-    <string name="Delete">Delete</string>
-    <string name="Cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
     <string name="invalid">Invalid</string>
     <string name="valid">Valid</string>
     <string name="unknown_title">Unknown title</string>
@@ -38,5 +38,6 @@
     <string name="time_by_author">%1$s by %2$s</string>
     <string name="view_full_article">VIEW FULL ARTICLE</string>
     <string name="successfully_updated">Successfully updated.</string>
+    <string name="empty_url">Feed url is empty!</string>
 
 </resources>

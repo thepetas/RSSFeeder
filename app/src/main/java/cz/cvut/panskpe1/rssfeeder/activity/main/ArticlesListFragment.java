@@ -1,12 +1,10 @@
 package cz.cvut.panskpe1.rssfeeder.activity.main;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
@@ -14,21 +12,18 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.content.ServiceConnection;
 import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import cz.cvut.panskpe1.rssfeeder.R;
-import cz.cvut.panskpe1.rssfeeder.activity.article.ArticleDetailActivity;
 import cz.cvut.panskpe1.rssfeeder.activity.feed.FeedActivity;
 import cz.cvut.panskpe1.rssfeeder.data.MyContentProvider;
 import cz.cvut.panskpe1.rssfeeder.service.AlarmBroadcastReceiver;
@@ -50,7 +45,7 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
     private MenuItem mRefreshMenuItem;
     private DownloadService mService;
     private ArticleListFragmentCallback mCallback;
-    private int actualPosition = 1;
+    private long lastId = -1;
 
 
     @Override
@@ -115,6 +110,10 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public long getLastId() {
+        return lastId;
     }
 
     public void refreshingStart() {
@@ -186,8 +185,14 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
                 case DownloadService.STATE_STARTED:
                     refreshingStart();
                     break;
-                case DownloadService.STATE_FINISHED:
+                case DownloadService.STATE_FINISHED_OK:
                     refreshingStop();
+                    Toast.makeText(getActivity(), R.string.successfully_updated, Toast.LENGTH_LONG).show();
+                    break;
+
+                case DownloadService.STATE_FINISHED_FAIL:
+                    refreshingStop();
+                    Toast.makeText(getActivity(), R.string.update_failed, Toast.LENGTH_LONG).show();
                     break;
             }
         }
@@ -201,18 +206,13 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
         super.onResume();
     }
 
-    public int getActualArticleId() {
-//        TODO predelat misto poradi na tag
-        return actualPosition + 1;
-    }
-
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        actualPosition = position;
         Log.i("FR", String.valueOf(getSelectedItemPosition()));
         Log.i("FR", String.valueOf(position));
         Cursor entry = (Cursor) mAdapter.getItem(position);
         int idColumn = entry.getColumnIndex(ID);
+        lastId = entry.getLong(idColumn);
         mCallback.onArticleClick(entry.getLong(idColumn));
     }
 

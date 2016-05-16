@@ -1,14 +1,15 @@
 package cz.cvut.panskpe1.rssfeeder.activity.feed;
 
-import android.app.Fragment;
+import android.app.ListFragment;
 import android.app.LoaderManager;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ListView;
 
 import cz.cvut.panskpe1.rssfeeder.R;
@@ -21,68 +22,76 @@ import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.TITLE;
 /**
  * Created by petr on 3/20/16.
  */
-public class FeedsListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class FeedsListFragment extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    private static final String ADD_FEED_DIALOG_FRAGMENT = "AddFeedDialog";
     private static final int FEED_LOADER = 1;
-    private ListView mListView;
     private FeedCursorAdapter mAdapter;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.list_fragment, container, false);
-        return view;
-    }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getLoaderManager().initLoader(FEED_LOADER, null, this);
+        setHasOptionsMenu(true);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mAdapter = new FeedCursorAdapter(getActivity(), null, 0);
-        mListView = (ListView) getActivity().findViewById(R.id.database_content);
-        mListView.setAdapter(mAdapter);
+        getLoaderManager().initLoader(FEED_LOADER, null, this);
     }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case FEED_LOADER:
-                return new CursorLoader(getActivity(), MyContentProvider.CONTENT_URI_FEED,
-                        new String[]{ID, TITLE, LINK}, null, null, null);
-            default:
-                break;
+        if (FEED_LOADER == id) {
+            return new CursorLoader(getActivity(), MyContentProvider.CONTENT_URI_FEED,
+                    new String[]{ID, TITLE, LINK}, null, null, null);
         }
-
         return null;
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        switch (loader.getId()) {
-            case FEED_LOADER:
+        if (!isAdded()) {
+            return;
+        }
+        if (loader.getId() == FEED_LOADER) {
+            if (mAdapter == null) {
+                mAdapter = new FeedCursorAdapter(getActivity(), data);
+                setListAdapter(mAdapter);
+            } else
                 mAdapter.changeCursor(data);
-//                mAdapter.swapCursor(data);
-                break;
-            default:
-                break;
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        switch (loader.getId()) {
-            case FEED_LOADER:
-                mAdapter.changeCursor(null);
-//                mAdapter.swapCursor(null);
-                break;
+        if (loader.getId() == FEED_LOADER) {
+            mAdapter.changeCursor(null);
+        }
+    }
 
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        DeleteFeedDialog.show(getFragmentManager(), id);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.feed, menu);
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                getActivity().finish();
+                return true;
+            case R.id.add_feed_item:
+                new AddFeedDialog().show(getFragmentManager(), ADD_FEED_DIALOG_FRAGMENT);
+                return true;
             default:
-                break;
+                return super.onOptionsItemSelected(item);
         }
     }
 
