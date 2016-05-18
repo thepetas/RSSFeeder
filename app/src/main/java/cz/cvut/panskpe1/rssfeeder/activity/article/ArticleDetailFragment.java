@@ -10,6 +10,7 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -114,7 +115,7 @@ public class ArticleDetailFragment extends Fragment {
                     Uri.withAppendedPath(MyContentProvider.CONTENT_URI_FEED, String.valueOf(feedId)),
                     null, null, null, null);
             if (cFeed.moveToNext()) {
-                feed = new Feed(String.valueOf(id), cFeed.getString(cFeed.getColumnIndex(LINK)), cFeed.getString(cFeed.getColumnIndex(TITLE)));
+                feed = new Feed(String.valueOf(feedId), cFeed.getString(cFeed.getColumnIndex(LINK)), cFeed.getString(cFeed.getColumnIndex(TITLE)));
                 feed.setAuthor(cFeed.getString(cFeed.getColumnIndex(AUTHOR)));
             }
             cFeed.close();
@@ -127,8 +128,9 @@ public class ArticleDetailFragment extends Fragment {
             mFeedEntry.setContent(cArticle.getString(cArticle.getColumnIndex(CONTENT)));
             mFeedEntry.setUpdated(cArticle.getLong(cArticle.getColumnIndex(UPDATED)));
             mFeedEntry.setAuthor(cArticle.getString(cArticle.getColumnIndex(AUTHOR)));
+        } else {
+            mFeedEntry = null;
         }
-        mFeedEntry = null;
     }
 
     @Override

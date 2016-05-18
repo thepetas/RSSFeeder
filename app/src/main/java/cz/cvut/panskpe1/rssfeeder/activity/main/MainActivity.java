@@ -21,7 +21,6 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
 
     private static final String TAG = "MAIN_ACTIVITY";
     private boolean isXlarge;
-//    private static final String TASK_FRAGMENT = "TaskFragment";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,13 +58,13 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
                 .commit();
     }
 
-    @Override
+    /*@Override
     protected void onStop() {
 //        if (mService != null) {
 //            unbindService(mConnection);
 //        }
         super.onStop();
-    }
+    }*/
 
     @Override
     protected void onStart() {
@@ -102,6 +101,7 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
 
     @Override
     public void onArticleClick(long id) {
+        Log.i(TAG, "ID: " + id);
         if (isXlarge) {
             ArticleDetailFragment fragment = (ArticleDetailFragment) getFragmentManager().findFragmentById(R.id.detailFragment);
             fragment.fillData(id);

@@ -71,7 +71,7 @@ public class UpdateManager {
         }
     }
 
-    private void saveSyndFeed(String url, SyndFeed feed) {
+    public void saveSyndFeed(String url, SyndFeed feed) {
         long id = saveFeed(url, feed);
         saveEntries(id, feed);
     }
@@ -136,7 +136,6 @@ public class UpdateManager {
         try {
             while (cursor.moveToNext()) {
                 String url = cursor.getString(urlIndex);
-                Log.i("UM", "URL: " + url);
                 URL feedSource = new URL(url);
                 SyndFeed feed = new SyndFeedInput().build(new XmlReader(feedSource));
                 saveSyndFeed(url, feed);

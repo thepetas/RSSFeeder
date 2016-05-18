@@ -40,7 +40,7 @@ public class ArticleDetailActivity extends Activity {
     private Fragment createArticleDetailFragment() {
         Bundle args = new Bundle();
         args.putLong(ArticleDetailFragment.ARG_ENTRY_ID,
-                getIntent().getLongExtra(ENTRY_ID, 0));
+                getIntent().getLongExtra(ENTRY_ID, 1));
         return Fragment.instantiate(this, ArticleDetailFragment.class.getName(), args);
     }
 }

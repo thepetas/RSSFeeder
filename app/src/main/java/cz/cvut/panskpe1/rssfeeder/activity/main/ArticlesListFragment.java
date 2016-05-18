@@ -75,7 +75,6 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         setListAdapter(mAdapter);
-//        TODO blablabla
     }
 
     @Override
@@ -87,14 +86,7 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.main, menu);
-
-        if (mRefreshMenuItem == null)
-            mRefreshMenuItem = menu.findItem(R.id.update_item);
-
-//        if (mTaskFragment.isRunning()) {
-//            refreshingStart();
-//        }
-
+        mRefreshMenuItem = menu.findItem(R.id.update_item);
     }
 
     @Override
@@ -127,20 +119,6 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
             mRefreshMenuItem.setActionView(null);
         }
     }
-
-    ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            Log.i("ARTICLE_LIST_FRAGMENT", "Service is connected..");
-            mService = (DownloadService) ((DownloadService.MyBinder) service).getServiceInstance();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            Log.i("ARTICLE_LIST_FRAGMENT", "Service is disconnected..");
-            mService = null;
-        }
-    };
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -184,6 +162,7 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
             switch (state) {
                 case DownloadService.STATE_STARTED:
                     refreshingStart();
+                    Log.i("FR", "CONTINUE!!!!!!");
                     break;
                 case DownloadService.STATE_FINISHED_OK:
                     refreshingStop();
@@ -208,25 +187,32 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        Log.i("FR", String.valueOf(getSelectedItemPosition()));
-        Log.i("FR", String.valueOf(position));
-        Cursor entry = (Cursor) mAdapter.getItem(position);
-        int idColumn = entry.getColumnIndex(ID);
-        lastId = entry.getLong(idColumn);
-        mCallback.onArticleClick(entry.getLong(idColumn));
+        mCallback.onArticleClick(id);
     }
 
     @Override
-    public void onPause() {
+    public void onStop() {
         if (mService != null) {
             getActivity().unbindService(mConnection);
         }
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(refreshStateReceiver);
-        super.onPause();
+        super.onStop();
     }
 
-    public static interface ArticleListFragmentCallback {
-        public void onArticleClick(long entryId);
+    ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mService = ((DownloadService.MyBinder) service).getServiceInstance();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+        }
+    };
+
+    public interface ArticleListFragmentCallback {
+        void onArticleClick(long entryId);
 
     }
 }
