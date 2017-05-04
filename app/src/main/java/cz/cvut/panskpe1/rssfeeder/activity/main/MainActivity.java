@@ -68,8 +68,6 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
 
     @Override
     protected void onStart() {
-        Intent intent = new Intent(ScheduleBroadcastReceiver.SCHEDULE);
-        sendBroadcast(intent);
         if (isXlarge) {
             ArticlesListFragment list = (ArticlesListFragment) getFragmentManager().findFragmentById(R.id.containerMainActivity);
             ArticleDetailFragment fragment = (ArticleDetailFragment) getFragmentManager().findFragmentById(R.id.detailFragment);

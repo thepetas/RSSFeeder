@@ -17,7 +17,7 @@ public class ScheduleBroadcastReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i("ScheduleBroadcastReceiver", "Setting repeating alarm");
+        Log.i("MyReceiver", "Setting repeating alarm...");
         scheduleAlarms(context);
     }
 
