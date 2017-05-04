@@ -1,5 +1,6 @@
 package cz.cvut.panskpe1.rssfeeder.service;
 
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.IntentService;
 import android.content.Intent;
@@ -25,15 +26,11 @@ import cz.cvut.panskpe1.rssfeeder.data.UpdateManager;
  */
 public class DownloadService extends IntentService {
 
-    public static long DOWNLOAD_INTERVAL = AlarmManager.INTERVAL_HOUR * 5;
-    //    public static long DOWNLOAD_INTERVAL = 1000 * 50;
+    //    public static long DOWNLOAD_INTERVAL = AlarmManager.INTERVAL_HOUR * 5;
+    public static long DOWNLOAD_INTERVAL = 10 * 1000;
     private static String TAG = "DownloadService";
-
-    public static final String BROADCAST_REFRESH = "rss_reader_refresh";
-    public static final int STATE_STARTED = 0;
-    public static final int STATE_FINISHED_OK = 1;
-    public static final int STATE_FINISHED_FAIL = 2;
-    public static final String STATE = "STATUS_REFRESH";
+    private DownloadServiceCallback mCallback;
+    private boolean isRunning = false;
 
     IBinder mBinder = new MyBinder();
 
@@ -53,23 +50,18 @@ public class DownloadService extends IntentService {
     }
 
     public void updateAll() {
-        publishChange(STATE_STARTED);
+//        TODO start
+        if (mCallback != null)
+            mCallback.startRefresh();
+        isRunning = true;
         Log.i(TAG, "Starting update");
-
-//        UpdateManager updateManager = new UpdateManager(getContentResolver(), getResources());
-//        boolean res = updateManager.updateAll();
         boolean res = updateArticles();
-        for (int i = 0; i < 6; i++) {
-            publishChange(STATE_STARTED);
-            Log.i(TAG, "Time: " + (i + 1) + "/6");
-            SystemClock.sleep(1000);
-        }
-
+        SystemClock.sleep(5 * 1000);
         Log.i(TAG, "Ending update");
-        if (res)
-            publishChange(STATE_FINISHED_OK);
-        else
-            publishChange(STATE_FINISHED_FAIL);
+        isRunning = false;
+        if (mCallback != null)
+            mCallback.stopRefresh();
+//        TODO end success/ fail
     }
 
     private boolean updateArticles() {
@@ -80,7 +72,6 @@ public class DownloadService extends IntentService {
 
         try {
             while (cursor.moveToNext()) {
-                publishChange(STATE_STARTED);
                 String url = cursor.getString(urlIndex);
                 URL feedSource = new URL(url);
                 SyndFeed feed = new SyndFeedInput().build(new XmlReader(feedSource));
@@ -95,12 +86,6 @@ public class DownloadService extends IntentService {
         return true;
     }
 
-    private void publishChange(int num) {
-        Intent intent = new Intent(BROADCAST_REFRESH);
-        intent.putExtra(STATE, num);
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-    }
-
     public class MyBinder extends Binder {
         public DownloadService getServiceInstance() {
             return DownloadService.this;
@@ -111,6 +96,20 @@ public class DownloadService extends IntentService {
     public void onDestroy() {
         mBinder = null;
         super.onDestroy();
+    }
+
+    public void registerClient(Activity activity) {
+        mCallback = (DownloadServiceCallback) activity;
+    }
+
+    public boolean isDownloading() {
+        return isRunning;
+    }
+
+    public interface DownloadServiceCallback {
+        public void startRefresh();
+
+        public void stopRefresh();
     }
 
 }

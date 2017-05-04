@@ -42,8 +42,6 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
 
     private static final int ARTICLE_LOADER = 1;
     private ArticleCursorAdapter mAdapter;
-    private MenuItem mRefreshMenuItem;
-    private DownloadService mService;
     private ArticleListFragmentCallback mCallback;
     private long lastId = -1;
 
@@ -68,7 +66,6 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -83,42 +80,11 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
         getLoaderManager().initLoader(ARTICLE_LOADER, null, this);
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.main, menu);
-        mRefreshMenuItem = menu.findItem(R.id.update_item);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.feeds_item:
-                Intent intent = new Intent(getActivity(), FeedActivity.class);
-                startActivity(intent);
-                return true;
-            case R.id.update_item:
-                AlarmBroadcastReceiver.startService(getActivity());
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
     public long getLastId() {
         return lastId;
     }
 
-    public void refreshingStart() {
-        mRefreshMenuItem.setActionView(R.layout.action_progressbar);
-        mRefreshMenuItem.expandActionView();
-    }
 
-    public void refreshingStop() {
-        if (mRefreshMenuItem.getActionView() != null) {
-            mRefreshMenuItem.collapseActionView();
-            mRefreshMenuItem.setActionView(null);
-        }
-    }
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
@@ -155,33 +121,10 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
         }
     }
 
-    private BroadcastReceiver refreshStateReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int state = intent.getIntExtra(DownloadService.STATE, -1);
-            switch (state) {
-                case DownloadService.STATE_STARTED:
-                    refreshingStart();
-                    Log.i("FR", "CONTINUE!!!!!!");
-                    break;
-                case DownloadService.STATE_FINISHED_OK:
-                    refreshingStop();
-                    Toast.makeText(getActivity(), R.string.successfully_updated, Toast.LENGTH_LONG).show();
-                    break;
-
-                case DownloadService.STATE_FINISHED_FAIL:
-                    refreshingStop();
-                    Toast.makeText(getActivity(), R.string.update_failed, Toast.LENGTH_LONG).show();
-                    break;
-            }
-        }
-    };
-
     @Override
     public void onResume() {
         Intent intentBind = new Intent(getActivity(), DownloadService.class);
-        getActivity().bindService(intentBind, mConnection, Context.BIND_AUTO_CREATE);
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(refreshStateReceiver, new IntentFilter(DownloadService.BROADCAST_REFRESH));
+//        getActivity().bindService(intentBind, mConnection, Context.BIND_AUTO_CREATE);
         super.onResume();
     }
 
@@ -190,26 +133,25 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
         mCallback.onArticleClick(id);
     }
 
-    @Override
-    public void onStop() {
-        if (mService != null) {
-            getActivity().unbindService(mConnection);
-        }
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(refreshStateReceiver);
-        super.onStop();
-    }
+//    @Override
+//    public void onStop() {
+//        if (mService != null) {
+//            getActivity().unbindService(mConnection);
+//        }
+//        super.onStop();
+//    }
 
-    ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mService = ((DownloadService.MyBinder) service).getServiceInstance();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-            mService = null;
-        }
-    };
+//    ServiceConnection mConnection = new ServiceConnection() {
+//        @Override
+//        public void onServiceConnected(ComponentName name, IBinder service) {
+//            mService = ((DownloadService.MyBinder) service).getServiceInstance();
+//        }
+//
+//        @Override
+//        public void onServiceDisconnected(ComponentName name) {
+//            mService = null;
+//        }
+//    };
 
     public interface ArticleListFragmentCallback {
         void onArticleClick(long entryId);
