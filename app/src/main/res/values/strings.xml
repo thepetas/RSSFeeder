@@ -17,8 +17,8 @@
     <string name="entry_not_found_desc">The Article was not found. Please return back and select</string>
     <string name="main_item_menu_feeds">Manage feeds</string>
     <string name="add_feed">Add feed</string>
-    <string name="update_item">update_item</string>
-    <string name="feeds_list">feeds_list</string>
+    <string name="update_item">Update articles</string>
+    <string name="feeds_list">Feeds list</string>
     <string name="add_new_feed">Add new feed</string>
     <string name="save">Save</string>
     <string name="back">Back</string>
