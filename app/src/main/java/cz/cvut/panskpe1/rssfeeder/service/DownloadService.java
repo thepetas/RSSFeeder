@@ -26,8 +26,8 @@ import cz.cvut.panskpe1.rssfeeder.data.UpdateManager;
  */
 public class DownloadService extends IntentService {
 
-    //    public static long DOWNLOAD_INTERVAL = AlarmManager.INTERVAL_HOUR * 5;
-    public static long DOWNLOAD_INTERVAL = 10 * 1000;
+        public static long DOWNLOAD_INTERVAL = AlarmManager.INTERVAL_HOUR * 5;
+//    public static long DOWNLOAD_INTERVAL = 10 * 1000;
     private static String TAG = "DownloadService";
     private DownloadServiceCallback mCallback;
     private boolean isRunning = false;

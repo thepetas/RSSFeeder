@@ -69,13 +69,17 @@ public class ArticleDetailFragment extends Fragment {
         mDate = (TextView) view.findViewById(R.id.article_detail_date_author);
         mText = (TextView) view.findViewById(R.id.article_detail_text);
         mLink = (TextView) view.findViewById(R.id.article_link);
-        long id = getArguments().getLong(ARG_ENTRY_ID);
-        fillData(id);
+
+        if (getArguments() != null && getArguments().containsKey(ARG_ENTRY_ID)) {
+            long id = getArguments().getLong(ARG_ENTRY_ID);
+            fillData(id);
+        }
     }
 
     public void fillData(long id) {
         initArticleEntry(id);
         if (mFeedEntry != null) {
+            getView().setVisibility(View.VISIBLE);
             mTitle.setText(Html.fromHtml(mFeedEntry.getTitle()));
             String author = mFeedEntry.getAuthor();
             if (TextUtils.isEmpty(author)) {
@@ -95,10 +99,11 @@ public class ArticleDetailFragment extends Fragment {
             mLink.setText(textLink);
 
         } else {
-            mTitle.setText(R.string.entry_not_found);
-            mDate.setVisibility(View.INVISIBLE);
-            mText.setText(R.string.entry_not_found_desc);
-            mText.setTextColor(getResources().getColor(R.color.text_red));
+            getView().setVisibility(View.INVISIBLE);
+//            mTitle.setText(R.string.entry_not_found);
+//            mDate.setVisibility(View.INVISIBLE);
+//            mText.setText(R.string.entry_not_found_desc);
+//            mText.setTextColor(getResources().getColor(R.color.text_red));
         }
     }
 

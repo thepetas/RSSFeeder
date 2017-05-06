@@ -21,7 +21,6 @@ import cz.cvut.panskpe1.rssfeeder.activity.article.ArticleDetailFragment;
 import cz.cvut.panskpe1.rssfeeder.activity.feed.FeedActivity;
 import cz.cvut.panskpe1.rssfeeder.service.AlarmBroadcastReceiver;
 import cz.cvut.panskpe1.rssfeeder.service.DownloadService;
-import cz.cvut.panskpe1.rssfeeder.service.ScheduleBroadcastReceiver;
 
 /**
  * Created by petr on 3/19/16.
@@ -57,10 +56,7 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
     }
 
     private Fragment createArticleDetailFragment() {
-        Bundle args = new Bundle();
-        args.putLong(ArticleDetailFragment.ARG_ENTRY_ID,
-                getIntent().getLongExtra(ArticleDetailActivity.ENTRY_ID, 1));
-        return Fragment.instantiate(this, ArticleDetailFragment.class.getName(), args);
+        return Fragment.instantiate(this, ArticleDetailFragment.class.getName());
     }
 
     private void addMainFragment() {
@@ -114,13 +110,9 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
     @Override
     protected void onStart() {
         super.onStart();
-        if (isXlarge) {
-            ArticlesListFragment list = (ArticlesListFragment) getFragmentManager().findFragmentById(R.id.containerMainActivity);
-            ArticleDetailFragment fragment = (ArticleDetailFragment) getFragmentManager().findFragmentById(R.id.detailFragment);
-            fragment.fillData(list.getLastId());
-        }
         Intent intentBind = new Intent(this, DownloadService.class);
         bindService(intentBind, mConnection, Context.BIND_AUTO_CREATE);
+        initArticleByLastId();
 //        Toast.makeText(this, getSizeName(this), Toast.LENGTH_LONG).show();
     }
 
@@ -145,7 +137,7 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
 
     @Override
     public void onArticleClick(long id) {
-        Log.i(TAG, "ID: " + id);
+        Log.i(TAG, "Open Article with ID: " + id);
         if (isXlarge) {
             ArticleDetailFragment fragment = (ArticleDetailFragment) getFragmentManager().findFragmentById(R.id.detailFragment);
             fragment.fillData(id);
@@ -153,6 +145,15 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
             Intent intent = new Intent(this, ArticleDetailActivity.class);
             intent.putExtra(ArticleDetailActivity.ENTRY_ID, id);
             startActivity(intent);
+        }
+    }
+
+    @Override
+    public void initArticleByLastId() {
+        if (isXlarge) {
+            ArticlesListFragment listFragment = (ArticlesListFragment) getFragmentManager().findFragmentById(R.id.containerMainActivity);
+            ArticleDetailFragment fragment = (ArticleDetailFragment) getFragmentManager().findFragmentById(R.id.detailFragment);
+            fragment.fillData(listFragment.getLastId());
         }
     }
 
@@ -183,7 +184,7 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
         public void onServiceConnected(ComponentName name, IBinder service) {
             mService = ((DownloadService.MyBinder) service).getServiceInstance();
             mService.registerClient(MainActivity.this);
-            if (mRefreshMenuItem != null) {
+            if (mRefreshMenuItem != null && mService.isDownloading()) {
                 refreshingStart();
             }
         }

@@ -3,30 +3,15 @@ package cz.cvut.panskpe1.rssfeeder.activity.main;
 import android.app.Activity;
 import android.app.ListFragment;
 import android.app.LoaderManager;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.Loader;
-import android.content.ServiceConnection;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.IBinder;
-import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
-import cz.cvut.panskpe1.rssfeeder.R;
-import cz.cvut.panskpe1.rssfeeder.activity.feed.FeedActivity;
 import cz.cvut.panskpe1.rssfeeder.data.MyContentProvider;
-import cz.cvut.panskpe1.rssfeeder.service.AlarmBroadcastReceiver;
 import cz.cvut.panskpe1.rssfeeder.service.DownloadService;
 
 import static cz.cvut.panskpe1.rssfeeder.data.DbConstants.FEED_ID;
@@ -43,7 +28,7 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
     private static final int ARTICLE_LOADER = 1;
     private ArticleCursorAdapter mAdapter;
     private ArticleListFragmentCallback mCallback;
-    private long lastId = -1;
+    private long lastId = 0;
 
 
     @Override
@@ -85,7 +70,6 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
     }
 
 
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         switch (id) {
@@ -108,10 +92,13 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
             if (mAdapter == null) {
                 mAdapter = new ArticleCursorAdapter(getActivity(), data);
                 setListAdapter(mAdapter);
+
+                if (mAdapter.getCount() > 0)
+                    lastId = mAdapter.getItemId(0);
+                mCallback.initArticleByLastId();
             }
             mAdapter.changeCursor(data);
         }
-
     }
 
     @Override
@@ -124,37 +111,17 @@ public class ArticlesListFragment extends ListFragment implements LoaderManager.
     @Override
     public void onResume() {
         Intent intentBind = new Intent(getActivity(), DownloadService.class);
-//        getActivity().bindService(intentBind, mConnection, Context.BIND_AUTO_CREATE);
         super.onResume();
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
+        lastId = id;
         mCallback.onArticleClick(id);
     }
 
-//    @Override
-//    public void onStop() {
-//        if (mService != null) {
-//            getActivity().unbindService(mConnection);
-//        }
-//        super.onStop();
-//    }
-
-//    ServiceConnection mConnection = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//            mService = ((DownloadService.MyBinder) service).getServiceInstance();
-//        }
-//
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            mService = null;
-//        }
-//    };
-
     public interface ArticleListFragmentCallback {
         void onArticleClick(long entryId);
-
+        void initArticleByLastId();
     }
 }
