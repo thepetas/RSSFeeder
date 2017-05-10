@@ -8,16 +8,13 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.text.Html;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.google.code.rome.android.repackaged.com.sun.syndication.feed.synd.SyndContent;
 import com.google.code.rome.android.repackaged.com.sun.syndication.feed.synd.SyndEntry;
 import com.google.code.rome.android.repackaged.com.sun.syndication.feed.synd.SyndFeed;
-import com.google.code.rome.android.repackaged.com.sun.syndication.io.FeedException;
 import com.google.code.rome.android.repackaged.com.sun.syndication.io.SyndFeedInput;
 import com.google.code.rome.android.repackaged.com.sun.syndication.io.XmlReader;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 

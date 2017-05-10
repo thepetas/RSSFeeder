@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.SystemClock;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.code.rome.android.repackaged.com.sun.syndication.feed.synd.SyndFeed;
@@ -26,8 +24,7 @@ import cz.cvut.panskpe1.rssfeeder.data.UpdateManager;
  */
 public class DownloadService extends IntentService {
 
-        public static long DOWNLOAD_INTERVAL = AlarmManager.INTERVAL_HOUR * 5;
-//    public static long DOWNLOAD_INTERVAL = 10 * 1000;
+    public static long DOWNLOAD_INTERVAL = AlarmManager.INTERVAL_HOUR * 5;
     private static String TAG = "DownloadService";
     private DownloadServiceCallback mCallback;
     private boolean isRunning = false;
@@ -50,18 +47,20 @@ public class DownloadService extends IntentService {
     }
 
     public void updateAll() {
+
+
 //        TODO start
         if (mCallback != null)
             mCallback.startRefresh();
         isRunning = true;
         Log.i(TAG, "Starting update");
         boolean res = updateArticles();
-        SystemClock.sleep(5 * 1000);
-        Log.i(TAG, "Ending update");
         isRunning = false;
         if (mCallback != null)
             mCallback.stopRefresh();
-//        TODO end success/ fail
+        if (!res && mCallback != null) {
+            mCallback.notifyDownloadFailed();
+        }
     }
 
     private boolean updateArticles() {
@@ -108,6 +107,8 @@ public class DownloadService extends IntentService {
 
     public interface DownloadServiceCallback {
         public void startRefresh();
+
+        public void notifyDownloadFailed();
 
         public void stopRefresh();
     }

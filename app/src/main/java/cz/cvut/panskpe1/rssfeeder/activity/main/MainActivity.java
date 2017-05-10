@@ -14,6 +14,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import cz.cvut.panskpe1.rssfeeder.R;
 import cz.cvut.panskpe1.rssfeeder.activity.article.ArticleDetailActivity;
@@ -166,6 +167,11 @@ public class MainActivity extends Activity implements ArticlesListFragment.Artic
                 refreshingStart();
             }
         });
+    }
+
+    @Override
+    public void notifyDownloadFailed() {
+        Toast.makeText(this, getString(R.string.update_failed), Toast.LENGTH_SHORT).show();
     }
 
     @Override
